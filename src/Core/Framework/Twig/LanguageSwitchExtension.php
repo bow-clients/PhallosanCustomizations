@@ -13,6 +13,7 @@ use Shopware\Core\System\Country\CountryEntity;
 use Shopware\Core\System\SalesChannel\Aggregate\SalesChannelDomain\SalesChannelDomainEntity;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class LanguageSwitchExtension extends AbstractExtension
@@ -32,6 +33,33 @@ class LanguageSwitchExtension extends AbstractExtension
             new TwigFunction('getLanguagesForCurrentChannel', [$this, 'getLanguagesForCurrentChannel']),
             new TwigFunction('getCurrentCountryInfo', [$this, 'getCurrentCountryInfo']),
         ];
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            new TwigFilter('country_flag_emoji', [$this, 'countryFlagEmoji']),
+        ];
+    }
+
+    /**
+     * Convert country ISO code to flag emoji
+     * Uses regional indicator symbols: A = 🇦 (U+1F1E6), B = 🇧 (U+1F1E7), etc.
+     */
+    public function countryFlagEmoji(string $countryIso): string
+    {
+        $countryIso = strtoupper(trim($countryIso));
+        
+        if (strlen($countryIso) !== 2) {
+            return '🏳️'; // White flag as fallback
+        }
+
+        // Regional indicator symbols start at U+1F1E6 for 'A'
+        $offset = 0x1F1E6 - ord('A');
+        
+        $flag = mb_chr(ord($countryIso[0]) + $offset) . mb_chr(ord($countryIso[1]) + $offset);
+        
+        return $flag;
     }
 
     public function getLanguageSwitch(SalesChannelContext $salesChannelContext): array
@@ -108,6 +136,7 @@ class LanguageSwitchExtension extends AbstractExtension
 
     /**
      * Get available languages for the current Sales Channel
+     * Deduplicates by language ID to avoid showing same language multiple times
      */
     public function getLanguagesForCurrentChannel(SalesChannelContext $salesChannelContext): array
     {
@@ -118,6 +147,7 @@ class LanguageSwitchExtension extends AbstractExtension
         $domains = $this->domainRepository->search($criteria, $salesChannelContext->getContext())->getElements();
 
         $languages = [];
+        $seenLanguageIds = [];
         $currentLanguageId = $salesChannelContext->getLanguageId();
 
         /** @var SalesChannelDomainEntity $domain */
@@ -127,9 +157,15 @@ class LanguageSwitchExtension extends AbstractExtension
                 continue;
             }
 
+            // Skip duplicate languages (same language with different domains)
+            if (isset($seenLanguageIds[$language->getId()])) {
+                continue;
+            }
+            $seenLanguageIds[$language->getId()] = true;
+
             $translationCode = $language->getTranslationCode();
             $languageCode = $translationCode?->getCode() ?? 'en-GB';
-            $shortCode = substr($languageCode, 0, 2);
+            $shortCode = strtoupper(substr($languageCode, 0, 2));
 
             $languages[] = [
                 'id' => $language->getId(),

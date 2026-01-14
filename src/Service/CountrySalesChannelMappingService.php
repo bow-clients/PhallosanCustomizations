@@ -2,18 +2,19 @@
 
 namespace PhallosanCustomizations\Service;
 
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
-use Shopware\Core\System\Country\CountryEntity;
-use Shopware\Core\System\SalesChannel\Aggregate\SalesChannelDomain\SalesChannelDomainEntity;
+use Doctrine\DBAL\Connection;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 /**
  * Service for mapping countries to their respective Sales Channels (EU, Asia, World)
  * 
- * This service determines which Sales Channel a country belongs to and provides
- * the correct redirect URL including the default language for that country.
+ * Country-to-SC mapping is read DYNAMICALLY from the database (sales_channel_country table).
+ * Only the default language per country is configured statically.
+ * 
+ * Sales Channels:
+ * - EU:    019a731a013a76fba1cbd2b571e03b7a (EUR, GBP, CHF)
+ * - Asia:  019a732c988676e086ad2873ece26058 (USD)
+ * - World: 019bbc28b4177179b3fa977326ce37ba (USD)
  */
 class CountrySalesChannelMappingService
 {
@@ -21,93 +22,114 @@ class CountrySalesChannelMappingService
     public const REGION_ASIA = 'asia';
     public const REGION_WORLD = 'world';
 
+    // Sales Channel IDs
+    public const SC_ID_EU = '019a731a013a76fba1cbd2b571e03b7a';
+    public const SC_ID_ASIA = '019a732c988676e086ad2873ece26058';
+    public const SC_ID_WORLD = '019bbc28b4177179b3fa977326ce37ba';
+
     /**
-     * Country ISO Code -> Region + Default Language Mapping
-     * 
-     * Format: 'ISO' => ['region' => 'eu|asia|world', 'language' => 'de|en|fr|...']
+     * SC ID -> Region name mapping
      */
-    private const COUNTRY_MAPPING = [
-        // EU Countries
-        'DE' => ['region' => self::REGION_EU, 'language' => 'de'],
-        'AT' => ['region' => self::REGION_EU, 'language' => 'de'],
-        'CH' => ['region' => self::REGION_EU, 'language' => 'de'],
-        'LI' => ['region' => self::REGION_EU, 'language' => 'de'],
-        'LU' => ['region' => self::REGION_EU, 'language' => 'de'],
-        
-        'FR' => ['region' => self::REGION_EU, 'language' => 'fr'],
-        'BE' => ['region' => self::REGION_EU, 'language' => 'fr'],
-        'MC' => ['region' => self::REGION_EU, 'language' => 'fr'],
-        
-        'IT' => ['region' => self::REGION_EU, 'language' => 'it'],
-        'SM' => ['region' => self::REGION_EU, 'language' => 'it'],
-        'VA' => ['region' => self::REGION_EU, 'language' => 'it'],
-        
-        'ES' => ['region' => self::REGION_EU, 'language' => 'es'],
-        'AD' => ['region' => self::REGION_EU, 'language' => 'es'],
-        
-        'PT' => ['region' => self::REGION_EU, 'language' => 'pt'],
-        
-        'NL' => ['region' => self::REGION_EU, 'language' => 'nl'],
-        
-        'PL' => ['region' => self::REGION_EU, 'language' => 'pl'],
-        
-        'GB' => ['region' => self::REGION_EU, 'language' => 'en'],
-        'IE' => ['region' => self::REGION_EU, 'language' => 'en'],
-        'MT' => ['region' => self::REGION_EU, 'language' => 'en'],
-        
-        'SE' => ['region' => self::REGION_EU, 'language' => 'sv'],
-        'NO' => ['region' => self::REGION_EU, 'language' => 'no'],
-        'DK' => ['region' => self::REGION_EU, 'language' => 'da'],
-        'FI' => ['region' => self::REGION_EU, 'language' => 'fi'],
-        'IS' => ['region' => self::REGION_EU, 'language' => 'en'],
-        
-        'GR' => ['region' => self::REGION_EU, 'language' => 'el'],
-        'CY' => ['region' => self::REGION_EU, 'language' => 'el'],
-        
-        'CZ' => ['region' => self::REGION_EU, 'language' => 'cs'],
-        'SK' => ['region' => self::REGION_EU, 'language' => 'sk'],
-        'HU' => ['region' => self::REGION_EU, 'language' => 'hu'],
-        'RO' => ['region' => self::REGION_EU, 'language' => 'ro'],
-        'BG' => ['region' => self::REGION_EU, 'language' => 'bg'],
-        'HR' => ['region' => self::REGION_EU, 'language' => 'hr'],
-        'SI' => ['region' => self::REGION_EU, 'language' => 'sl'],
-        'EE' => ['region' => self::REGION_EU, 'language' => 'et'],
-        'LV' => ['region' => self::REGION_EU, 'language' => 'lv'],
-        'LT' => ['region' => self::REGION_EU, 'language' => 'lt'],
-        
-        // Asia Countries
-        'JP' => ['region' => self::REGION_ASIA, 'language' => 'ja'],
-        'KR' => ['region' => self::REGION_ASIA, 'language' => 'ko'],
-        'CN' => ['region' => self::REGION_ASIA, 'language' => 'zh'],
-        'TW' => ['region' => self::REGION_ASIA, 'language' => 'zh'],
-        'HK' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        'SG' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        'MY' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        'TH' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        'VN' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        'PH' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        'ID' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        'IN' => ['region' => self::REGION_ASIA, 'language' => 'en'],
-        
-        // World Countries (Americas, Oceania, Africa, etc.)
-        'US' => ['region' => self::REGION_WORLD, 'language' => 'en'],
-        'CA' => ['region' => self::REGION_WORLD, 'language' => 'en'],
-        'AU' => ['region' => self::REGION_WORLD, 'language' => 'en'],
-        'NZ' => ['region' => self::REGION_WORLD, 'language' => 'en'],
-        'ZA' => ['region' => self::REGION_WORLD, 'language' => 'en'],
-        
-        'MX' => ['region' => self::REGION_WORLD, 'language' => 'es'],
-        'AR' => ['region' => self::REGION_WORLD, 'language' => 'es'],
-        'CL' => ['region' => self::REGION_WORLD, 'language' => 'es'],
-        'CO' => ['region' => self::REGION_WORLD, 'language' => 'es'],
-        'PE' => ['region' => self::REGION_WORLD, 'language' => 'es'],
-        
-        'BR' => ['region' => self::REGION_WORLD, 'language' => 'pt'],
+    private const SC_TO_REGION = [
+        self::SC_ID_EU => self::REGION_EU,
+        self::SC_ID_ASIA => self::REGION_ASIA,
+        self::SC_ID_WORLD => self::REGION_WORLD,
     ];
 
     /**
-     * Domain configuration for each region
-     * This should be configured via plugin config or environment
+     * Default language per country ISO code.
+     * Used to determine which language to show when redirecting to a SC.
+     * Falls back to 'en' if not configured.
+     */
+    private const DEFAULT_LANGUAGE_BY_COUNTRY = [
+        // German-speaking
+        'DE' => 'de', 'AT' => 'de', 'CH' => 'de', 'LI' => 'de', 'LU' => 'de',
+        
+        // French-speaking
+        'FR' => 'fr', 'BE' => 'fr', 'MC' => 'fr',
+        'SN' => 'fr', 'CI' => 'fr', 'CM' => 'fr', 'CD' => 'fr', 'CG' => 'fr',
+        'GA' => 'fr', 'BJ' => 'fr', 'TG' => 'fr', 'BF' => 'fr', 'ML' => 'fr',
+        'NE' => 'fr', 'TD' => 'fr', 'CF' => 'fr', 'GN' => 'fr', 'MR' => 'fr',
+        'MG' => 'fr', 'KM' => 'fr', 'DJ' => 'fr', 'BI' => 'fr', 'RE' => 'fr',
+        'YT' => 'fr', 'HT' => 'fr', 'GP' => 'fr', 'MQ' => 'fr', 'GF' => 'fr',
+        'BL' => 'fr', 'MF' => 'fr', 'MA' => 'fr', 'DZ' => 'fr', 'TN' => 'fr',
+        
+        // Italian-speaking
+        'IT' => 'it', 'SM' => 'it', 'VA' => 'it',
+        
+        // Spanish-speaking
+        'ES' => 'es', 'AD' => 'es',
+        'MX' => 'es', 'GT' => 'es', 'SV' => 'es', 'HN' => 'es', 'NI' => 'es',
+        'CR' => 'es', 'PA' => 'es', 'CU' => 'es', 'DO' => 'es', 'PR' => 'es',
+        'AR' => 'es', 'CL' => 'es', 'CO' => 'es', 'PE' => 'es', 'VE' => 'es',
+        'EC' => 'es', 'BO' => 'es', 'PY' => 'es', 'UY' => 'es',
+        'GQ' => 'es', 'EH' => 'es',
+        
+        // Portuguese-speaking
+        'BR' => 'pt', 'AO' => 'pt', 'CV' => 'pt', 'GW' => 'pt', 'ST' => 'pt',
+        
+        // Dutch-speaking
+        'NL' => 'nl',
+        
+        // Polish-speaking
+        'PL' => 'pl',
+        
+        // Japanese
+        'JP' => 'ja',
+        
+        // Korean
+        'KR' => 'ko', 'KP' => 'ko',
+        
+        // Chinese
+        'CN' => 'zh', 'TW' => 'zh', 'HK' => 'zh', 'MO' => 'zh',
+        
+        // Thai
+        'TH' => 'th',
+        
+        // Hindi
+        'IN' => 'hi',
+        
+        // Arabic
+        'AE' => 'ar', 'SA' => 'ar', 'QA' => 'ar', 'KW' => 'ar', 'BH' => 'ar',
+        'OM' => 'ar', 'YE' => 'ar', 'JO' => 'ar', 'LB' => 'ar', 'SY' => 'ar',
+        'IQ' => 'ar', 'PS' => 'ar',
+        
+        // Turkish
+        'TR' => 'tr',
+        
+        // Russian
+        'RU' => 'ru',
+        
+        // Greek
+        'GR' => 'el', 'CY' => 'el',
+        
+        // Czech
+        'CZ' => 'cs',
+        
+        // Hungarian
+        'HU' => 'hu',
+        
+        // Swedish
+        'SE' => 'sv',
+        
+        // Norwegian
+        'NO' => 'no',
+        
+        // Finnish
+        'FI' => 'fi',
+        
+        // Croatian
+        'HR' => 'hr',
+        
+        // Lithuanian
+        'LT' => 'lt',
+        
+        // Slovak
+        'SK' => 'sk',
+    ];
+
+    /**
+     * Domain URLs for each region
      */
     private array $regionDomains = [
         self::REGION_EU => 'https://eu.phallosan.com',
@@ -116,19 +138,26 @@ class CountrySalesChannelMappingService
     ];
 
     /**
-     * Sales Channel IDs for each region
-     * These need to be set after Sales Channels are created in Admin
+     * Cached country->SC mapping from database
+     * @var array<string, string>|null  [ISO => SC_ID]
      */
-    private array $regionSalesChannelIds = [
-        self::REGION_EU => null,
-        self::REGION_ASIA => null,
-        self::REGION_WORLD => null,
-    ];
+    private ?array $countryToScCache = null;
 
     public function __construct(
-        private readonly EntityRepository $salesChannelDomainRepository,
-        private readonly EntityRepository $countryRepository
+        private readonly Connection $connection
     ) {
+    }
+
+    /**
+     * Get the Sales Channel ID for a country ISO code (from database)
+     */
+    public function getSalesChannelIdForCountry(string $countryIso): ?string
+    {
+        $this->loadCountryMappingFromDatabase();
+        
+        $countryIso = strtoupper($countryIso);
+        
+        return $this->countryToScCache[$countryIso] ?? null;
     }
 
     /**
@@ -136,9 +165,13 @@ class CountrySalesChannelMappingService
      */
     public function getRegionForCountry(string $countryIso): string
     {
-        $countryIso = strtoupper($countryIso);
+        $scId = $this->getSalesChannelIdForCountry($countryIso);
         
-        return self::COUNTRY_MAPPING[$countryIso]['region'] ?? self::REGION_WORLD;
+        if ($scId === null) {
+            return self::REGION_WORLD; // Fallback
+        }
+        
+        return self::SC_TO_REGION[$scId] ?? self::REGION_WORLD;
     }
 
     /**
@@ -148,7 +181,7 @@ class CountrySalesChannelMappingService
     {
         $countryIso = strtoupper($countryIso);
         
-        return self::COUNTRY_MAPPING[$countryIso]['language'] ?? 'en';
+        return self::DEFAULT_LANGUAGE_BY_COUNTRY[$countryIso] ?? 'en';
     }
 
     /**
@@ -158,9 +191,10 @@ class CountrySalesChannelMappingService
     {
         $countryIso = strtoupper($countryIso);
         
-        return self::COUNTRY_MAPPING[$countryIso] ?? [
-            'region' => self::REGION_WORLD,
-            'language' => 'en'
+        return [
+            'region' => $this->getRegionForCountry($countryIso),
+            'language' => $this->getDefaultLanguageForCountry($countryIso),
+            'salesChannelId' => $this->getSalesChannelIdForCountry($countryIso),
         ];
     }
 
@@ -190,14 +224,13 @@ class CountrySalesChannelMappingService
     }
 
     /**
-     * Check if a country belongs to the current Sales Channel's region
+     * Check if a country belongs to the current Sales Channel
      */
-    public function isCountryInCurrentRegion(string $countryIso, SalesChannelContext $context): bool
+    public function isCountryInCurrentSalesChannel(string $countryIso, SalesChannelContext $context): bool
     {
-        $currentRegion = $this->getRegionForSalesChannel($context->getSalesChannelId());
-        $countryRegion = $this->getRegionForCountry($countryIso);
+        $countrySalesChannelId = $this->getSalesChannelIdForCountry($countryIso);
         
-        return $currentRegion === $countryRegion;
+        return $countrySalesChannelId === $context->getSalesChannelId();
     }
 
     /**
@@ -205,47 +238,46 @@ class CountrySalesChannelMappingService
      */
     public function getRegionForSalesChannel(string $salesChannelId): string
     {
-        foreach ($this->regionSalesChannelIds as $region => $id) {
-            if ($id === $salesChannelId) {
-                return $region;
+        return self::SC_TO_REGION[$salesChannelId] ?? self::REGION_WORLD;
+    }
+
+    /**
+     * Get all countries for a specific Sales Channel (from database)
+     * 
+     * @return array<string> List of country ISO codes
+     */
+    public function getCountriesForSalesChannel(string $salesChannelId): array
+    {
+        $this->loadCountryMappingFromDatabase();
+        
+        $countries = [];
+        foreach ($this->countryToScCache as $iso => $scId) {
+            if ($scId === $salesChannelId) {
+                $countries[] = $iso;
             }
         }
         
-        // Default to world if not found
-        return self::REGION_WORLD;
+        return $countries;
     }
 
     /**
-     * Set Sales Channel IDs for regions (call from config or migration)
-     */
-    public function setRegionSalesChannelIds(array $ids): void
-    {
-        $this->regionSalesChannelIds = array_merge($this->regionSalesChannelIds, $ids);
-    }
-
-    /**
-     * Set domain URLs for regions (call from config)
-     */
-    public function setRegionDomains(array $domains): void
-    {
-        $this->regionDomains = array_merge($this->regionDomains, $domains);
-    }
-
-    /**
-     * Get all countries grouped by region for UI display
+     * Get all countries grouped by region
      */
     public function getCountriesGroupedByRegion(): array
     {
+        $this->loadCountryMappingFromDatabase();
+        
         $grouped = [
             self::REGION_EU => [],
             self::REGION_ASIA => [],
             self::REGION_WORLD => [],
         ];
 
-        foreach (self::COUNTRY_MAPPING as $iso => $data) {
-            $grouped[$data['region']][] = [
+        foreach ($this->countryToScCache as $iso => $scId) {
+            $region = self::SC_TO_REGION[$scId] ?? self::REGION_WORLD;
+            $grouped[$region][] = [
                 'iso' => $iso,
-                'language' => $data['language'],
+                'language' => $this->getDefaultLanguageForCountry($iso),
             ];
         }
 
@@ -257,14 +289,96 @@ class CountrySalesChannelMappingService
      */
     public function hasMapping(string $countryIso): bool
     {
-        return isset(self::COUNTRY_MAPPING[strtoupper($countryIso)]);
+        return $this->getSalesChannelIdForCountry($countryIso) !== null;
     }
 
     /**
-     * Get all supported country ISO codes
+     * Get all supported country ISO codes (from database)
      */
     public function getSupportedCountries(): array
     {
-        return array_keys(self::COUNTRY_MAPPING);
+        $this->loadCountryMappingFromDatabase();
+        
+        return array_keys($this->countryToScCache ?? []);
+    }
+
+    /**
+     * Set domain URLs for regions (call from config)
+     */
+    public function setRegionDomains(array $domains): void
+    {
+        $this->regionDomains = array_merge($this->regionDomains, $domains);
+    }
+
+    /**
+     * Clear the cached country mapping (call after country assignments change)
+     */
+    public function clearCache(): void
+    {
+        $this->countryToScCache = null;
+    }
+
+    /**
+     * Load country->SC mapping from the database
+     */
+    private function loadCountryMappingFromDatabase(): void
+    {
+        if ($this->countryToScCache !== null) {
+            return;
+        }
+
+        $this->countryToScCache = [];
+
+        // Query all country assignments for our 3 Sales Channels
+        $sql = '
+            SELECT 
+                c.iso,
+                LOWER(HEX(scc.sales_channel_id)) as sales_channel_id
+            FROM sales_channel_country scc
+            JOIN country c ON scc.country_id = c.id
+            WHERE scc.sales_channel_id IN (
+                UNHEX(:scEu),
+                UNHEX(:scAsia),
+                UNHEX(:scWorld)
+            )
+            AND c.active = 1
+        ';
+
+        $result = $this->connection->fetchAllAssociative($sql, [
+            'scEu' => self::SC_ID_EU,
+            'scAsia' => self::SC_ID_ASIA,
+            'scWorld' => self::SC_ID_WORLD,
+        ]);
+
+        foreach ($result as $row) {
+            $iso = strtoupper($row['iso']);
+            $scId = $row['sales_channel_id'];
+            
+            // If a country is assigned to multiple SCs, prioritize: EU > Asia > World
+            if (!isset($this->countryToScCache[$iso])) {
+                $this->countryToScCache[$iso] = $scId;
+            } else {
+                // Priority handling
+                $currentPriority = $this->getSalesChannelPriority($this->countryToScCache[$iso]);
+                $newPriority = $this->getSalesChannelPriority($scId);
+                
+                if ($newPriority < $currentPriority) {
+                    $this->countryToScCache[$iso] = $scId;
+                }
+            }
+        }
+    }
+
+    /**
+     * Get priority for SC (lower = higher priority)
+     */
+    private function getSalesChannelPriority(string $salesChannelId): int
+    {
+        return match ($salesChannelId) {
+            self::SC_ID_EU => 1,
+            self::SC_ID_ASIA => 2,
+            self::SC_ID_WORLD => 3,
+            default => 99,
+        };
     }
 }

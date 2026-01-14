@@ -9,6 +9,7 @@
         {% block layout_header_actions_country_widget_form %}
             {% set currentCountry = getCountries(context.salesChannel.id, context.context) %}
             {% set languageDomains = getLanguageSwitch(context) %}
+            {% set availableLanguages = getLanguagesForCurrentChannel(context) %}
 
             <div class="top-bar-nav-text country-language-switch me-1">{{ 'top-bar.country-switch'|trans }}</div>
             <form method="post"
@@ -99,6 +100,52 @@
                     {% for key, value in app.request.attributes.get('_route_params') %}
                         <input name="redirectParameters[{{ key }}]" type="hidden" value="{{ value }}">
                     {% endfor %}
+                {% endblock %}
+
+                {# Language Dropdown - only show if more than one language available #}
+                {% block layout_header_actions_language_dropdown %}
+                    {% if availableLanguages|length > 1 %}
+                        {% set currentLanguage = null %}
+                        {% for lang in availableLanguages %}
+                            {% if lang.isActive %}
+                                {% set currentLanguage = lang %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if currentLanguage is null and availableLanguages|length > 0 %}
+                            {% set currentLanguage = availableLanguages|first %}
+                        {% endif %}
+
+                        <div class="languages-menu dropdown ms-2">
+                            <button class="btn dropdown-toggle top-bar-nav-btn"
+                                    type="button"
+                                    id="languageSelectDropdown-{{ position }}"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-label="{{ 'header.selectLanguage'|trans|striptags }}">
+                                <span class="top-bar-nav-text">
+                                    <span class="language-flag-emoji" aria-hidden="true">{{ currentLanguage.shortCode|country_flag_emoji }}</span>
+                                    {{ currentLanguage.name }}
+                                </span>
+                            </button>
+
+                            <ul class="top-bar-list dropdown-menu dropdown-menu-end"
+                                aria-label="{{ 'header.languageList'|trans|striptags }}">
+
+                                {% for lang in availableLanguages %}
+                                    <li class="top-bar-list-item{% if lang.isActive %} item-checked active{% endif %}">
+                                        <button class="dropdown-item d-flex align-items-center gap-2{% if lang.isActive %} active{% endif %}"
+                                                type="submit"
+                                                name="languageDomainId"
+                                                value="{{ lang.domainId }}">
+                                            <span class="language-flag-emoji" aria-hidden="true">{{ lang.shortCode|country_flag_emoji }}</span>
+                                            {{ lang.name }}
+                                        </button>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
                 {% endblock %}
             </form>
         {% endblock %}

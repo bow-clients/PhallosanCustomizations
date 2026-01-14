@@ -12,9 +12,9 @@
         </service>
 
         <!-- Country to Sales Channel Mapping Service (3-SC Model) -->
+        <!-- Reads country-SC mapping dynamically from database -->
         <service id="PhallosanCustomizations\Service\CountrySalesChannelMappingService">
-            <argument type="service" id="sales_channel_domain.repository"/>
-            <argument type="service" id="country.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
     </services>
