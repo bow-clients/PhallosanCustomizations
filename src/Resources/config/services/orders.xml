@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <!-- Order Overview -->
+        <service id="PhallosanCustomizations\Order\Overview\OrderRouteDecorator" decorates="Shopware\Core\Checkout\Order\SalesChannel\OrderRoute">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="promotion.repository"/>
+            <argument type="service" id="shopware.rate_limiter"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+    </services>
+</container>

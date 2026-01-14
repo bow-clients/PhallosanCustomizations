@@ -1,0 +1,23 @@
+{
+  "finecom-export": {
+    "order": {
+      "button": {
+        "export": "Export to FineCom",
+        "remove": "Remove FineCom Tag",
+        "processing": "Please wait..."
+      },
+      "success": {
+        "tagAdded": "FINECOM_FETCHABLE tag has been added, payment status set to \"paid\" and order status set to \"in progress\" and the invoice was created. Please wait, the site will be reloading.",
+        "tagRemoved": "FINECOM_FETCHABLE tag has been successfully removed."
+      },
+      "error": {
+        "tagNotFound": "FINECOM_FETCHABLE tag not found. Please create the tag first.",
+        "general": "Error adding FINECOM_FETCHABLE tag or setting payment status.",
+        "tagRemove": "Error removing FINECOM_FETCHABLE tag."
+      },
+      "warning": {
+        "invoiceFailed": "Automatic invoice creation failed. Please create the invoice manually via \"Documents\"."
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+    "phallosan-customizations": {
+        "order": {
+            "comments": {
+                "date": "Datum",
+                "title": "Kommentare",
+                "addComment": "Kommentar hinzufügen",
+                "commentLabel": "Kommentar",
+                "commentPlaceholder": "Geben Sie hier Ihren Kommentar ein...",
+                "isPublicLabel": "Kommentar mitsenden",
+                "isPublicHelpText": "Das Kommentar wird in der Mail angezeigt",
+                "save": "Speichern",
+                "cancel": "Abbrechen",
+                "public": "Kommentar mitgesendet",
+                "private": "Intern",
+                "noComments": "Noch keine Kommentare",
+                "noCommentsSubline": "Fügen Sie den ersten Kommentar hinzu",
+                "customerComment": "Kundenkommentar",
+                "loadError": "Fehler beim Laden der Kommentare",
+                "addSuccess": "Kommentar erfolgreich hinzugefügt",
+                "addError": "Fehler beim Hinzufügen des Kommentars"
+            }
+        }
+    }
+}
+

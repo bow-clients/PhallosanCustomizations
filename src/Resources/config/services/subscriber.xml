@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <service id="PhallosanCustomizations\Subscriber\ResponseSubscriber">
+            <argument type="service" id="PhallosanCustomizations\Service\CategoryRedirectService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\OrderPlacedSubscriber">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService" />
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="PhallosanCustomizations\Service\NewsletterRegistrationService" />
+
+            <tag name="kernel.event_subscriber" />
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\CheckoutPaymentSubscriber">
+            <argument type="service" id="country.repository" />
+            <argument type="service" id="sales_channel.repository" />
+            <argument type="service" id="PhallosanCustomizations\Service\LanguageChannelSwitchService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\AccountService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\LogoutRoute"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
+            <tag name="kernel.event_subscriber" />
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\SaleschannelCountrySubscriber">
+            <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
+            <argument type="service" id="country.repository"/>
+            <tag name="kernel.event_subscriber" />
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\Registration\DisableRegistrationCaptchaSubscriber">
+            <tag name="kernel.event_subscriber" />
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\RouteSubscriber">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\MailSubscriber">
+            <argument type="service" id="order_comment.repository" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\CustomsDutyProductCriteriaSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+        <!-- Decorator -->
+        <service id="PhallosanCustomizations\Subscriber\CustomerGroupSubscriberDecorator" decorates="Shopware\Core\Checkout\Customer\Subscriber\CustomerGroupSubscriber">
+            <argument type="service" id="PhallosanCustomizations\Subscriber\CustomerGroupSubscriberDecorator.inner" />
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="customer_group.repository"/>
+            <argument type="service" id="seo_url.repository"/>
+            <argument type="service" id="language.repository"/>
+            <argument type="service" id="Shopware\Core\Content\Seo\SeoUrlPersister"/>
+            <argument type="service" id="slugify"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\MediaUrlGeneratorDecorator" decorates="Shopware\Core\Content\Media\Core\Application\AbstractMediaUrlGenerator">
+            <argument type="service" id="shopware.filesystem.public"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Service\NewsletterRegistrationService" public="false">
+            <argument type="service" id="Shopware\Core\Content\Newsletter\SalesChannel\NewsletterSubscribeRoute" />
+            <argument type="service" id="request_stack" />
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\ProductPageSubscriber">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+    </services>
+</container>

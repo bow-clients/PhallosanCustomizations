@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <service id="PhallosanCustomizations\Core\Checkout\CustomsDutyCollector">
+            <argument type="service" id="tax_rule.repository" />
+            <argument type="service" id="product.repository" />
+            <tag name="shopware.cart.collector" priority="2000" />
+        </service>
+
+        <service id="PhallosanCustomizations\Core\Checkout\CustomsDutyProcessor">
+            <argument type="service" id="translator" />
+            <tag name="shopware.cart.processor" priority="2000" />
+        </service>
+
+        <service id="PhallosanCustomizations\Core\Checkout\ImportVatCollector">
+            <argument type="service" id="tax_rule.repository" />
+            <argument type="service" id="product.repository" />
+            <tag name="shopware.cart.collector" priority="1000" />
+        </service>
+
+        <service id="PhallosanCustomizations\Core\Checkout\ImportVatProcessor">
+            <argument type="service" id="translator" />
+            <tag name="shopware.cart.processor" priority="1000" />
+        </service>
+
+        <service id="PhallosanCustomizations\Core\Content\Product\Cart\ProductCartProcessor">
+            <argument type="service" id="Shopware\Core\Content\Product\Cart\ProductGateway"/>
+            <argument type="service" id="Shopware\Core\Content\Product\Cart\ProductFeatureBuilder"/>
+            <argument type="service" id="Shopware\Core\Content\Product\SalesChannel\Price\ProductPriceCalculator"/>
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+
+            <tag name="shopware.cart.processor" priority="5500"/>
+            <tag name="shopware.cart.collector" priority="5500"/>
+        </service>
+    </services>
+</container>

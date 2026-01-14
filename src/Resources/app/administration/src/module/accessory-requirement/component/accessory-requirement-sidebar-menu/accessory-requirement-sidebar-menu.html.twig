@@ -1,0 +1,24 @@
+<sw-tabs
+    position-identifier="accessory-requirements-sidebar-menu"
+    class="sw-settings__tabs accessory-requirements-sidebar-menu"
+    :isVertical="true"
+    :small="false"
+    >
+    <template #default="{ active }">
+        <sw-tabs-item
+            :route="{ name: 'accessory.requirement.list' }"
+            :title="$t('accessory-requirement.sidebar.menu.overview')"
+        >
+            {{ $t('accessory-requirement.sidebar.menu.overview') }}
+        </sw-tabs-item>
+        <sw-tabs-item
+                :route="{ name: 'accessory.requirement.order_list' }"
+                :title="$t('accessory-requirement.sidebar.menu.orders')"
+        >
+            {{ $t('accessory-requirement.sidebar.menu.orders') }}
+        </sw-tabs-item>
+    </template>
+    <template #content="{ active }">
+        <slot></slot>
+    </template>
+</sw-tabs>

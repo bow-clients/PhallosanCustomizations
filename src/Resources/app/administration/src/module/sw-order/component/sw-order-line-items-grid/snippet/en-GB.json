@@ -1,0 +1,8 @@
+{
+  "sw-order-line-items-grid": {
+    "column-title": "HS-Code",
+    "column-content-hscode-us": "US-Code:",
+    "column-content-hscode-eu": "EU-Code:",
+    "customfield-edit-title": "Edit HS-Code"
+  }
+}

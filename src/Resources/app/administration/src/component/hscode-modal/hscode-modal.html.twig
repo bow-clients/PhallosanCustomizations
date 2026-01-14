@@ -1,0 +1,35 @@
+<sw-modal
+        v-if="visible"
+        title="HS-Codes bearbeiten"
+        @modal-close="onCancel"
+>
+    <sw-text-field
+            :label="$tc('sw-order-line-items-grid-hscode-modal.label-hscode-eu')"
+            v-model:value="productHsCodeEu"
+            v-if="isEu"
+    />
+    <sw-text-field
+            :label="$tc('sw-order-line-items-grid-hscode-modal.label-hscode-us')"
+            v-model:value="productHsCodeUs"
+            v-else
+    />
+
+    <template #modal-footer>
+        <sw-button
+                size="small"
+                variant="secondary"
+                @click="onCancel"
+        >
+            {{ $tc('global.default.cancel') }}
+        </sw-button>
+
+        <sw-button
+                size="small"
+                variant="primary"
+                :is-loading="isLoading"
+                @click="onSave"
+        >
+            {{ $tc('global.default.save') }}
+        </sw-button>
+    </template>
+</sw-modal>

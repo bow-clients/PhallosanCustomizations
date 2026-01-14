@@ -1,0 +1,74 @@
+<div class="sw-order-comments">
+    <!-- Add Comment Form -->
+    <sw-modal :title="$tc('phallosan-customizations.order.comments.addComment')"
+              v-if="showAddComment"
+              @modal-close="closeModal()">
+        <mt-textarea
+                v-model:="newComment"
+                :label="$tc('phallosan-customizations.order.comments.commentLabel')"
+                :placeholder="$tc('phallosan-customizations.order.comments.commentPlaceholder')">
+        </mt-textarea>
+
+        <mt-switch
+                :checked="isPublic"
+                :label="$tc('phallosan-customizations.order.comments.isPublicLabel')"
+                :helpText="$tc('phallosan-customizations.order.comments.isPublicHelpText')"
+                @change="isPublic = !isPublic">
+        </mt-switch>
+
+        <div class="sw-order-comments__form-actions">
+            <sw-button
+                    variant="primary"
+                    size="small"
+                    @click="addComment"
+                    :disabled="!newComment.trim()">
+                {{ $tc('phallosan-customizations.order.comments.save') }}
+            </sw-button>
+            <sw-button
+                    variant="ghost"
+                    size="small"
+                    @click="closeModal">
+                {{ $tc('phallosan-customizations.order.comments.cancel') }}
+            </sw-button>
+        </div>
+    </sw-modal>
+
+    <sw-container type="row">
+        <div class="sw-order-comments__header">
+            <mt-button
+                    variant="ghost"
+                    size="small"
+                    @click="toggleAddComment">
+                {{ $tc('phallosan-customizations.order.comments.addComment') }}
+            </mt-button>
+        </div>
+    </sw-container>
+
+    <!-- Comments List -->
+    <sw-container
+            v-if="comments.length > 0"
+            type="row">
+        <sw-data-grid
+            :dataSource="comments"
+            :isLoading="isLoading"
+            :showSelection="false"
+            :showActions="false"
+            :columns="[
+                { property: 'createdAt', label: $tc('phallosan-customizations.order.comments.date')},
+                { property: 'comment', label: $tc('phallosan-customizations.order.comments.commentLabel')},
+                { property: 'isPublic', label: $tc('phallosan-customizations.order.comments.isPublicLabel')}
+            ]">
+            <template #column-createdAt="{ item }">
+                {{ dateFilter(item.createdAt, {hour: '2-digit', minute: '2-digit', second: '2-digit'}) }}
+            </template>
+            <template #column-isPublic="{ item }">
+                <sw-label
+                    size="small"
+                    :ghost="true"
+                    :variant="getPublicLabel(item.isPublic).variant">
+                    {{ getPublicLabel(item.isPublic).text }}
+                </sw-label>
+            </template>
+        </sw-data-grid>
+    </sw-container>
+</div>

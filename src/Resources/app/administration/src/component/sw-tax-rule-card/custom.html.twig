@@ -1,0 +1,10 @@
+{% block sw_settings_tax_list_grid_columns_actions %}
+    <template #column-customsDuty="{ item }">
+        {{ item.extensions?.customTaxRule?.customsDuty ?? '0' }}%
+    </template>
+    <template #column-importVat="{ item }">
+        {{ item.extensions?.customTaxRule?.importVat ?? '0' }}%
+    </template>
+
+    {% parent %}
+{% endblock %}

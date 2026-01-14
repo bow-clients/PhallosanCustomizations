@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+
+        <!-- Config Handler -->
+        <service id="PhallosanCustomizations\Core\Content\Sitemap\ConfigHandler\IgnoreProductsWithoutDetail">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="shopware.sitemap.config_handler"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Decorator\Sitemap\ProductUrlProviderDecorator"
+                 decorates="Shopware\Core\Content\Sitemap\Provider\ProductUrlProvider">
+            <argument type="service" id="Shopware\Core\Content\Sitemap\Service\ConfigHandler"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Shopware\Core\Content\Product\ProductDefinition"/>
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\Dbal\Common\IteratorFactory"/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Decorator\HrefLangLoader\HrefLandLoaderDecorator"
+                 decorates="Shopware\Core\Content\Seo\HreflangLoaderInterface">
+            <argument type="service" id="router.default"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Subscriber\SitemapSubscriber">
+            <argument type="service" id="shopware.filesystem.sitemap"/>
+            <argument type="service" id="shopware.asset.sitemap"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="cache.object"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+    </services>
+</container>

@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>Companies</title>
+        <title lang="de-DE">Unternehmen</title>
+
+        <input-field type="text">
+            <name>company</name>
+            <label>Company</label>
+            <label lang="de-DE">Unternehmen</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>street</name>
+            <label>Street</label>
+            <label lang="de-DE">Straße</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>postalCode</name>
+            <label>Postal Code</label>
+            <label lang="de-DE">Postleitzahl</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>city</name>
+            <label>City</label>
+            <label lang="de-DE">Stadt</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>country</name>
+            <label>Country</label>
+            <label lang="de-DE">Land</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>registrationNumber</name>
+            <label>Registration Number</label>
+            <label lang="de-DE">Handelsregisternummer</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>vatId</name>
+            <label>VAT ID</label>
+            <label lang="de-DE">USt-IdNr.</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>bank</name>
+            <label>Bank</label>
+            <label lang="de-DE">Bank</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>iban</name>
+            <label>IBAN</label>
+            <label lang="de-DE">IBAN</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>bic</name>
+            <label>BIC</label>
+            <label lang="de-DE">BIC</label>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Products</title>
+        <title lang="de-DE">Produkte</title>
+
+        <component name="sw-entity-single-select">
+            <name>defaultNoDetailRedirect</name>
+            <entity>category</entity>
+            <label>Default Category for the Product Redirect</label>
+            <label lang="de-DE">Standard Kategorie für Produkt-Weiterleitungen</label>
+        </component>
+
+        <component name="sw-entity-multi-id-select">
+            <name>countriesUsProductNumber</name>
+            <entity>country</entity>
+            <label>Countries with US product number</label>
+            <label lang="de-DE">Länder mit US-Produktnummer</label>
+        </component>
+
+        <input-field type="text">
+            <name>deliveryTime</name>
+            <label>Delivery Time</label>
+            <label lang="de-DE">Lieferzeit</label>
+        </input-field>
+
+        <component name="sw-entity-single-select">
+            <name>countryMadeInGermany</name>
+            <entity>country</entity>
+            <label>Country for "Made in Germany" logo</label>
+            <label lang="de-DE">Land für "Made in Germany" Logo</label>
+        </component>
+
+        <input-field type="text">
+            <name>hsCodeSuffix</name>
+            <label>US HS-Code suffix</label>
+            <label lang="de-DE">US HS-Code suffix</label>
+        </input-field>
+
+        <component name="sw-entity-single-select">
+            <name>hsCodeSuffixCountry</name>
+            <entity>country</entity>
+            <label>US HS-Code suffix countrys</label>
+            <label lang="de-DE">US HS-Code suffix Land</label>
+        </component>
+    </card>
+
+    <card>
+        <title>Checkout</title>
+        <title lang="de-DE">Checkout</title>
+
+        <component name="sw-entity-single-select">
+            <name>continueShoppingLinkInCard</name>
+            <entity>category</entity>
+            <label>Set the link in the cart for continue shopping</label>
+            <label lang="de-DE">Verlinkung für den Weiter-Einkaufen-Link im Warenkorb</label>
+        </component>
+
+        <input-field type="bool">
+            <name>couponCodeField</name>
+            <label>Activates the voucher field in the checkout.</label>
+            <label lang="de-DE">Aktiviert das Gutschein Feld im Checkout.</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>externalCheckoutLink</name>
+            <label>Deactivate checkout and set new link.</label>
+            <label lang="de-DE">Checkout deaktivieren und neue Verlinkung setzen.</label>
+        </input-field>
+
+        <component name="sw-entity-multi-id-select">
+            <name>countriesShippingCosts</name>
+            <entity>country</entity>
+            <label>Shows the country of delivery for the shipping costs in the checkout.</label>
+            <label lang="de-DE">Zeigt bei den Versandkosten im Checkout das Lieferland an.</label>
+        </component>
+
+        <component name="sw-entity-single-select">
+            <name>affiliateGTC</name>
+            <entity>cms_page</entity>
+            <label>GTC affiliate</label>
+            <label lang="de-DE">AGB Partnerprogramm</label>
+            <helpText>Sets the AGB link in the affiliate programme registration form.</helpText>
+            <helpText lang="de-DE">Setzt die AGB Verlinkung beim Partnerprogramm Registrierungsformular.</helpText>
+        </component>
+
+        <component name="sw-entity-multi-id-select">
+            <name>countriesArcId</name>
+            <entity>country</entity>
+            <label>Countries which show ARC ID</label>
+            <label lang="de-DE">Länder in welchen die ARC ID angezeigt wird</label>
+        </component>
+    </card>
+
+    <card>
+        <title>Newsletter</title>
+        <title lang="de-DE">Newsletter</title>
+
+        <component name="sw-entity-single-select">
+            <name>newsletterCategory</name>
+            <entity>category</entity>
+            <label>Newsletter Category</label>
+            <label lang="de-DE">Newsletter Kategorie</label>
+            <helpText>Used as a redirect for the newsletter in the footer.</helpText>
+            <helpText lang="de-DE">Wird als Weiterleitung für den Newsletter im Footer verwendet.</helpText>
+        </component>
+
+        <input-field type="bool">
+            <name>newsletterInCheckout</name>
+            <label>Newsletter-Checkbox in checkout</label>
+            <label lang="de-DE">Newsletter-Checkbox im Checkout anzeigen?</label>
+            <helpText>By activating this checkbox, the newsletter registration is displayed in the checkout area.</helpText>
+            <helpText lang="de-DE">Mit der Aktivierung dieser Checkbox wird die Newsletter-Anmeldung im Checkout-Bereich angezeigt.</helpText>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Reviews</title>
+        <title lang="de-DE">Bewertungen</title>
+
+        <input-field type="text">
+            <name>trustpilotBusinessunitId</name>
+            <label>Trustpilot Businessunit ID</label>
+            <label lang="de-DE">Trustpilot Businessunit ID</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>trustpilotTemplateId</name>
+            <label>Trustpilot Template ID</label>
+            <label lang="de-DE">Trustpilot Template ID</label>
+            <helpText>Used for the review CMS Block.</helpText>
+            <helpText lang="de-DE">Wird für den Review CMS Block genutzt.</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>trustpilotTemplateTabsId</name>
+            <label>Trustpilot Tabs Template ID</label>
+            <label lang="de-DE">Trustpilot Tabs Template ID</label>
+            <helpText>Used for the review tabs CMS Block.</helpText>
+            <helpText lang="de-DE">Wird für den Review Tabs CMS Block genutzt.</helpText>
+        </input-field>
+
+        <component name="sw-entity-single-select">
+            <name>cmsFactoryElementReview</name>
+            <entity>cms_factory_element</entity>
+            <label>CMS Factory Element for Reviews</label>
+            <label lang="de-DE">CMS Factory Element für Reviews</label>
+        </component>
+    </card>
+
+    <card>
+        <title>SEO</title>
+        <component name="sw-entity-multi-id-select">
+            <name>seoUrlLanguage</name>
+            <entity>language</entity>
+            <label>Languages that should use english for </label>
+            <label lang="de-DE">Sprachen welche Englisch für seo-urls nutzen sollen</label>
+        </component>
+
+        <component name="sw-entity-multi-id-select">
+            <name>affiliateGroupRedirect</name>
+            <entity>customer_group</entity>
+            <label>group for affiliate</label>
+            <label lang="de-DE">Gruppen für das Partnerprogramm</label>
+        </component>
+    </card>
+
+    <card>
+        <title>Exports</title>
+        <title lang="de-DE">Exporte</title>
+        <component name="sw-entity-multi-id-select">
+            <name>patentExportProduct</name>
+            <entity>product</entity>
+            <label>Products for the patent-export</label>
+            <label lang="de-DE">Produkte für den Patent-Export</label>
+        </component>
+
+        <input-field type="text">
+            <name>taxOfficeEmail</name>
+            <label>Tax office email for data export</label>
+            <label lang="de-DE">E-Mail des Steuerbüros für den Daten Export</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>internalExportEmail</name>
+            <label>email for data export</label>
+            <label lang="de-DE">E-Mail den Daten Export</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>taxOfficeSalesEuLastExport</name>
+            <label>Last Exportdate of Monthly EU sales for TaxOffice</label>
+            <label lang="de-DE">Letztes exportdatum der monatlichen EU Verkäufe für das Steuerbüro</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>taxOfficeSalesWorldLastExport</name>
+            <label>Last Exportdate of Monthly world sales for TaxOffice</label>
+            <label lang="de-DE">Letztes exportdatum der monatlichen Welt Verkäufe für das Steuerbüro</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>taxOfficeCancellationsDeLastExport</name>
+            <label>Last Exportdate of Monthly De cancellations for TaxOffice</label>
+            <label lang="de-DE">Letztes exportdatum der monatlichen DE cancellations für das Steuerbüro</label>
+        </input-field>
+
+        <input-field type="text">
+            <name>taxOfficeCancellationsWorldLastExport</name>
+            <label>Last Exportdate of Monthly world cancellations for TaxOffice</label>
+            <label lang="de-DE">Letztes exportdatum der monatlichen Welt cancellations für das Steuerbüro</label>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Imports</title>
+        <title lang="de-DE">Importe</title>
+
+        <component name="sw-entity-single-select">
+            <name>ImportMainProductRule</name>
+            <entity>rule</entity>
+            <label>Rule for main products in shipping costs</label>
+            <label lang="de-DE">Verwendete Regel für Hauptprodukte bei den Versandkosten</label>
+        </component>
+
+        <component name="sw-entity-single-select">
+            <name>ImportMinorProductRule</name>
+            <entity>rule</entity>
+            <label>Rule for minor products in shipping costs</label>
+            <label lang="de-DE">Verwendete Regel für Nebenprodukte bei den Versandkosten</label>
+        </component>
+    </card>
+
+    <card>
+        <title>Stripe Logos</title>
+        <component name="sw-media-field">
+            <name>logo1</name>
+            <label>Logo 1</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo2</name>
+            <label>Logo 2</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo3</name>
+            <label>Logo 3</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo4</name>
+            <label>Logo 4</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo5</name>
+            <label>Logo 5</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo6</name>
+            <label>Logo 6</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo7</name>
+            <label>Logo 7</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo8</name>
+            <label>Logo 8</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo9</name>
+            <label>Logo 9</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo10</name>
+            <label>Logo 10</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo11</name>
+            <label>Logo 11</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo12</name>
+            <label>Logo 12</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo13</name>
+            <label>Logo 13</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo14</name>
+            <label>Logo 14</label>
+        </component>
+
+        <component name="sw-media-field">
+            <name>logo15</name>
+            <label>Logo 15</label>
+        </component>
+    </card>
+</config>

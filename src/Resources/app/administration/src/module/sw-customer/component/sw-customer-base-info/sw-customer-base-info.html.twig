@@ -1,0 +1,10 @@
+{% block sw_customer_base_metadata_turnover %}
+    <sw-description-list>
+        <dt class="sw-customer-base-info__label">
+            {{ $tc('sw-customer.baseInfo.labelTurnover') }}
+        </dt>
+        <dd class="sw-customer-base__label-turnover">
+            {{ currencyFilter(customer.orderTotalAmount, currencyCode) }}
+        </dd>
+    </sw-description-list>
+{% endblock %}

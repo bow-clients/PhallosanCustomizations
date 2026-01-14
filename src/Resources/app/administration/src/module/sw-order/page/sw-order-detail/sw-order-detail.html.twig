@@ -1,0 +1,16 @@
+{% block sw_order_detail_actions_slot_smart_bar_actions %}
+    {% parent %}
+    <sw-button
+        :variant="hasFinecomTag ? 'danger' : 'secondary'"
+        :disabled="isTagLoading"
+        @click="createTag"
+        class="finecom-export-button"
+    >
+        <template v-if="isTagLoading">
+            {{ $tc('finecom-export.order.button.processing') }}
+        </template>
+        <template v-else>
+            {{ hasFinecomTag ? $tc('finecom-export.order.button.remove') : $tc('finecom-export.order.button.export') }}
+        </template>
+    </sw-button>
+{% endblock %}

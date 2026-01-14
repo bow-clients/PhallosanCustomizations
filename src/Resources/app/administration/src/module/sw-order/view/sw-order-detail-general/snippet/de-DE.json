@@ -1,0 +1,10 @@
+{
+  "orderCustomer": {
+    "detail": {
+      "address": "Adressen",
+      "shippingAddress": "Lieferadresse",
+      "billingAddress": "Rechnungsadresse",
+      "tackingCodes": "Trackingcodes"
+    }
+  }
+}

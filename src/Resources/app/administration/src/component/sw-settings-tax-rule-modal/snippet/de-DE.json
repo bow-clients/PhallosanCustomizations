@@ -1,0 +1,10 @@
+{
+  "sw-settings-tax": {
+    "taxRuleCard": {
+      "labelCustomsTax": "Zollgebühr",
+      "labelImportVat": "Einfuhrumsatzsteuer",
+      "labelApplyImportVat": "Einfuhrumsatzsteuer im Warenkorb hinzufügen",
+      "labelApplyCustomsTax": "Zollgebühr im Warenkorb hinzufügen"
+    }
+  }
+}

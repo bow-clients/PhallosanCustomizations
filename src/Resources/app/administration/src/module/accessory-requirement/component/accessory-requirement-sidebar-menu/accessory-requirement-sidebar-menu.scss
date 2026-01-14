@@ -1,0 +1,29 @@
+.sw-page.has--sidebar-menu {
+  .sw-page__main-content-inner {
+    display: grid;
+    grid-template-columns: min-content auto;
+
+    .accessory-requirements-sidebar-menu {
+      padding: 25px 50px 25px 25px;
+      border-right: 1px solid #CCC;
+      position: relative;
+      width: auto;
+      min-width: 200px;
+
+      .sw-tabs__slider {
+        transition: none;
+      }
+      .sw-tabs__arrow {
+        display: none;
+      }
+
+      .sw-tabs-item.router-link-active {
+        border-left-color: #189eff;
+      }
+    }
+
+    > div:not(.accessory-requirement-sidebar-menu) {
+      position: relative;
+    }
+  }
+}

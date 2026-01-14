@@ -1,0 +1,75 @@
+{
+  "global": {
+    "entities": {
+      "accessory_requirement": "Zubehör Bedingung",
+      "accessory_requirement_order": "Zubehör Bedingung - Bestellung"
+    }
+  },
+  "accessory-requirement": {
+    "mainMenuItem": "Zubehör Bedingungen",
+    "descriptionTextModule": "Übersicht aller Produkte die nur unter Bedingungen gekauft werden können",
+    "sidebar": {
+      "menu": {
+        "overview": "Übersicht",
+        "orders": "Bestellungen"
+      }
+    },
+    "order": {
+      "detail": {
+        "accessoryProduct": "Zubehör Produkt",
+        "requiredProduct": "Benötigtes Produkt",
+        "orderNumber": "Bestellnummer",
+        "redeemedOrderNumber": "Eingelöst in Bestellung",
+        "comment": "Kommentar",
+        "active": "Aktiv",
+        "migrated": "Migriert",
+        "migratedAt": "Migriert am",
+        "createdAt": "Erstellt am",
+        "updatedAt": "Aktualisiert am",
+        "buttonEdit": "Bearbeiten",
+        "buttonCancel": "Abbrechen",
+        "cardTitleGeneralInfo": "Info",
+        "info": {
+          "columnOrderNumber": "Bestellnummer",
+          "columnRedeemedOrderNumber": "Eingelöst in Bestellnummer",
+          "columnCreatedAt": "Erstellt am",
+          "columnComment": "Kommentar",
+          "columnRedeemed": "Eingelöst",
+          "columnRedeemedAt": "Eingelöst am",
+          "columnMigrated": "Migriert",
+          "columnMigratedAt": "Migriert am",
+          "accessoryProduct": "Zubehör Produkt",
+          "productsWithRequirements": "Produkt mit Bedingungen",
+          "requiredProduct": "Benötigtes Produkt"
+        }
+      },
+      "list": {
+        "title": "Bestellungen",
+        "accessoryRequirementProduct": "Zubehör Produkt",
+        "orderNumber": "Bestellnummer",
+        "redeemedOrderNumber": "Eingelöst in Bestellnummer",
+        "redeemedAt": "Eingelöst am",
+        "redeemed": "Eingelöst"
+      }
+    },
+    "list": {
+      "refresh": "Aktualisieren",
+      "title": "Zubehör Produkte mit Bedingungen",
+      "addButton": "Hinzufügen",
+      "name": "Name",
+      "description": "Beschreibung"
+    },
+    "detail": {
+      "title": "Zubehör Produkt mit Bedingungen",
+      "hint": "Zubehör Produkte können nur in Kombination mit anderen Produkten gekauft werden. Wenn diese einzeln gekauft werden, muss im Bestellprozess die Bestellnummer einer Bestellung mit dem benötigten Produkt angegeben werden.",
+      "name": "Name",
+      "description": "Beschreibung",
+      "backBtn": "Zurück zur Übersicht",
+      "saveBtn": "Speichern",
+      "product": "Zubehör Produkt",
+      "requiredProduct": "Benötigtes Produkt",
+      "errorMessageSnippet": "Textbaustein für die Fehlermeldung",
+      "errorMessageSnippetHelpText": "Wenn dieser Textbaustein gefüllt ist, wird diese Fehlermeldung ausgegeben, wenn die Bedingung des Zubehörs nicht erfüllt ist."
+    }
+  }
+}

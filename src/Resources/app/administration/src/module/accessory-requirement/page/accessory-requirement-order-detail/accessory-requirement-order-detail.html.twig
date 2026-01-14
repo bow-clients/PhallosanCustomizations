@@ -1,0 +1,314 @@
+{% block accessory_requirement_detail %}
+    <sw-page class="accessory-requirement-detail">
+        <template #smart-bar-actions>
+            {% block accessory_requirement_detail_smart_bar_actions %}
+                <sw-button
+                        v-if="!editMode"
+                        :routerLink="{ name: 'accessory.requirement.order_list' }">
+                    {{ $t('accessory-requirement.detail.backBtn') }}
+                </sw-button>
+
+                <sw-button
+                        v-if="accessoryRequirementOrder && !editMode"
+                        v-tooltip="{
+                                message: $tc('sw-privileges.tooltip.warning'),
+                                disabled: acl.can('accessory_requirement.editor'),
+                                showOnDisabledElements: false
+                            }"
+                        class="accessory-requirement-order-detail__open-edit-mode-action"
+                        variant="primary"
+                        :disabled="isLoading || !acl.can('accessory_requirement.editor')"
+                        @click.prevent="editMode = true"
+                >
+                    {{ $tc('accessory-requirement.order.detail.buttonEdit') }}
+                </sw-button>
+                <sw-button
+                        v-if="accessoryRequirementOrder && !accessoryRequirementOrder._new && editMode"
+                        :disabled="isLoading"
+                        @click="disableEditMode"
+                >
+                    {{ $tc('accessory-requirement.order.detail.buttonCancel') }}
+                </sw-button>
+
+                <sw-button-process
+                        v-if="accessoryRequirementOrder && editMode"
+                        :isLoading="isLoading"
+                        :processSuccess="processSuccess"
+                        :disabled="!hasChanges || !isValid"
+                        variant="primary"
+                        @process-finish="saveFinish"
+                        @click="onClickSave">
+                    {{ $t('accessory-requirement.detail.saveBtn') }}
+                </sw-button-process>
+
+            {% endblock %}
+        </template>
+
+        <template #content>
+            <sw-card-view>
+                {% block accessory_requirement_order_detail_content %}
+                    <sw-card
+                            class="accessory-requirement-order-detail-info"
+                            position-identifier="accessory-requirement-order-detail-info"
+                            :title="$tc('accessory-requirement.order.detail.cardTitleGeneralInfo')"
+                            v-if="accessoryRequirementOrder"
+                    >
+
+                        {% block accessory_requirement_order_detail_info_card_container %}
+                            <template #grid>
+                                <sw-container rows="auto auto">
+
+                                    {% block accessory_requirement_order_detail_info_card_container_summary %}
+                                        <sw-card-section divider="bottom">
+
+                                            {% block accessory_requirement_order_detail_info_card_container_summary_header %}
+                                                <div class="accessory-requirement-order-detail-info-header">
+
+                                                    <sw-description-list>
+                                                        <dt class="accessory-requirement-order-detail-info__label" style="padding-top: 0;">
+                                                            {{ $tc('accessory-requirement.order.detail.info.accessoryProduct') }}
+                                                        </dt>
+                                                        <dd>
+                                                            <template v-if="editMode && accessoryRequirementOrder._isNew">
+                                                                <sw-entity-single-select
+                                                                        v-model:value="accessoryRequirementOrder.accessoryRequirementId"
+                                                                        entity="accessory_requirement"
+                                                                        value=""
+                                                                        size="medium"
+                                                                        required
+                                                                        labelProperty="name"
+                                                                />
+                                                            </template>
+                                                            <template v-else-if="accessoryRequirementOrder.accessoryRequirement">
+                                                                <router-link :to="{ name: 'accessory.requirement.detail', params: { id: accessoryRequirementOrder.accessoryRequirementId } }">
+                                                                    {{ accessoryRequirementOrder.accessoryRequirement.name }}
+                                                                </router-link>
+                                                                <p class="accessory-requirement-description">
+                                                                    {{ accessoryRequirementOrder.accessoryRequirement.description }}
+                                                                </p>
+                                                            </template>
+                                                        </dd>
+                                                    </sw-description-list>
+                                                    <sw-container
+                                                            v-if="accessoryRequirementOrder && !accessoryRequirementOrder._isNew"
+                                                            class="accessory-requirement-order-detail-info-container"
+                                                            columns="repeat(auto-fit, minmax(250px, 1fr))"
+                                                            gap="0px 15px"
+                                                    >
+                                                        <sw-description-list>
+                                                            <dt class="accessory-requirement-order-detail-info__label">
+                                                                {{ $tc('accessory-requirement.order.detail.info.productsWithRequirements') }}
+                                                            </dt>
+                                                            <dd>
+                                                                <template v-if="accessoryRequirementOrder.accessoryRequirement && accessoryRequirementOrder.accessoryRequirement.product">
+                                                                    <router-link :to="{ name: 'sw.product.detail', params: { id: accessoryRequirementOrder.accessoryRequirement.productId } }">
+                                                                        <template v-if="accessoryRequirementOrder.accessoryRequirement.product.translated.name">
+                                                                            {{ accessoryRequirementOrder.accessoryRequirement.product.translated.name }}
+                                                                        </template>
+                                                                        <template v-else>
+                                                                            {{ accessoryRequirementOrder.accessoryRequirement.product.name }}
+                                                                        </template>
+                                                                    </router-link>
+                                                                </template>
+                                                            </dd>
+                                                        </sw-description-list>
+                                                        <sw-description-list>
+                                                            <dt class="accessory-requirement-order-detail-info__label">
+                                                                {{ $tc('accessory-requirement.order.detail.info.requiredProduct') }}
+                                                            </dt>
+                                                            <dd>
+                                                                <template v-if="accessoryRequirementOrder.accessoryRequirement && accessoryRequirementOrder.accessoryRequirement.requiredProduct">
+                                                                    <router-link :to="{ name: 'sw.product.detail', params: { id: accessoryRequirementOrder.accessoryRequirement.requiredProductId } }">
+                                                                        <template v-if="accessoryRequirementOrder.accessoryRequirement.requiredProduct.translated.name">
+                                                                            {{ accessoryRequirementOrder.accessoryRequirement.requiredProduct.translated.name }}
+                                                                        </template>
+                                                                        <template v-else>
+                                                                            {{ accessoryRequirementOrder.accessoryRequirement.requiredProduct.name }}
+                                                                        </template>
+                                                                    </router-link>
+                                                                </template>
+                                                            </dd>
+                                                        </sw-description-list>
+                                                    </sw-container>
+                                                </div>
+                                            {% endblock %}
+
+                                        </sw-card-section>
+                                    {% endblock %}
+
+                                    {% block accessory_requirement_order_detail_info_card_container_details %}
+                                        <sw-card-section secondary slim v-if="accessoryRequirementOrder">
+
+                                            <sw-container
+                                                    class="accessory-requirement-order-detail-info-container"
+                                                    columns="repeat(auto-fit, minmax(250px, 1fr))"
+                                                    gap="0px 15px"
+                                            >
+                                                <div class="accessory-requirement-order-detail-info-columns">
+                                                    <sw-description-list>
+                                                        <dt class="accessory-requirement-order-detail-info__label">
+                                                            {{ $tc('accessory-requirement.order.detail.info.columnOrderNumber') }}
+                                                        </dt>
+
+                                                        <dd>
+                                                            <template v-if="!editMode || !accessoryRequirementOrder._isNew">
+                                                                <router-link
+                                                                        v-if="accessoryRequirementOrder.orderId"
+                                                                        :to="{ name: 'sw.order.detail', params: { id: accessoryRequirementOrder.orderId }}">
+                                                                    {{ accessoryRequirementOrder.orderNumber }}
+                                                                </router-link>
+                                                                <template v-else>
+                                                                    {{ accessoryRequirementOrder.orderNumber }}
+                                                                </template>
+                                                            </template>
+
+                                                            <template v-else>
+                                                                <sw-text-field
+                                                                    v-model:value="accessoryRequirementOrder.orderNumber"
+                                                                    required
+                                                                    type="text"
+                                                                >
+                                                                </sw-text-field>
+                                                            </template>
+                                                        </dd>
+                                                    </sw-description-list>
+
+                                                    <sw-description-list>
+                                                        <dt class="accessory-requirement-order-detail-info__label">
+                                                            {{ $tc('accessory-requirement.order.detail.info.columnCreatedAt') }}
+                                                        </dt>
+
+                                                        <dd>
+                                                            <sw-time-ago v-if="accessoryRequirementOrder.createdAt" :date="accessoryRequirementOrder.createdAt"/>
+                                                            <template v-else>&ndash;</template>
+                                                        </dd>
+                                                    </sw-description-list>
+
+                                                </div>
+                                                <div class="accessory-requirement-order-detail-info-columns">
+                                                    <sw-description-list>
+                                                        <dt class="accessory-requirement-order-detail-info__label">
+                                                            {{ $tc('accessory-requirement.order.detail.info.columnRedeemedOrderNumber') }}
+                                                        </dt>
+                                                        <dd>
+                                                            <template v-if="!editMode">
+                                                                <template v-if="accessoryRequirementOrder.redeemedOrderNumber">
+                                                                    <router-link
+                                                                            v-if="accessoryRequirementOrder.redeemedOrderId"
+                                                                            :to="{ name: 'sw.order.detail', params: { id: accessoryRequirementOrder.redeemedOrderId }}">
+                                                                        {{ accessoryRequirementOrder.redeemedOrderNumber }}
+                                                                    </router-link>
+                                                                    <template v-else>
+                                                                        {{ accessoryRequirementOrder.redeemedOrderNumber }}
+                                                                    </template>
+                                                                </template>
+                                                                <template v-else>
+                                                                    &ndash;
+                                                                </template>
+                                                            </template>
+                                                            <template v-else>
+                                                                <sw-text-field
+                                                                        v-model:value="accessoryRequirementOrder.redeemedOrderNumber"
+                                                                        type="text"
+                                                                >
+                                                                </sw-text-field>
+                                                            </template>
+                                                        </dd>
+                                                    </sw-description-list>
+
+                                                    <sw-description-list>
+                                                        <dt class="accessory-requirement-order-detail-info__label">
+                                                            {{ $tc('accessory-requirement.order.detail.info.columnRedeemedAt') }}
+                                                        </dt>
+
+                                                        <dd>
+                                                            <sw-time-ago
+                                                                    v-if="accessoryRequirementOrder.redeemedAt"
+                                                                    :date="accessoryRequirementOrder.redeemedAt"/>
+                                                            <template v-else>
+                                                                &ndash;
+                                                            </template>
+                                                        </dd>
+                                                    </sw-description-list>
+
+                                                </div>
+                                            </sw-container>
+                                            <sw-container
+                                                    v-if="accessoryRequirementOrder.migrated"
+                                                    class="accessory-requirement-order-detail-info-container"
+                                                    columns="repeat(auto-fit, minmax(250px, 1fr))"
+                                                    gap="0px 15px"
+                                            >
+                                                <sw-description-list>
+                                                    <dt class="accessory-requirement-order-detail-info__label">
+                                                        {{ $tc('accessory-requirement.order.detail.info.columnMigrated') }}
+                                                    </dt>
+
+                                                    <dd>
+                                                        <sw-icon
+                                                                name="regular-checkmark-xs"
+                                                                small
+                                                                class="is--active"
+                                                        />
+                                                    </dd>
+                                                </sw-description-list>
+
+                                                <sw-description-list>
+                                                    <dt class="accessory-requirement-order-detail-info__label">
+                                                        {{ $tc('accessory-requirement.order.detail.info.columnMigratedAt') }}
+                                                    </dt>
+
+                                                    <dd>
+                                                        <sw-time-ago :date="accessoryRequirementOrder.migratedAt"/>
+                                                    </dd>
+                                                </sw-description-list>
+                                            </sw-container>
+                                            <sw-description-list>
+                                                <dt class="accessory-requirement-order-detail-info__label">
+                                                    {{ $tc('accessory-requirement.order.detail.info.columnComment') }}
+                                                </dt>
+
+                                                <dd>
+                                                    <template v-if="!editMode">
+                                                        <div v-if="accessoryRequirementOrder.comment" style="white-space: pre;">
+                                                            {{ accessoryRequirementOrder.comment }}
+                                                        </div>
+                                                        <template v-else>
+                                                            &ndash;
+                                                        </template>
+                                                    </template>
+                                                    <template v-else>
+                                                        <sw-textarea-field
+                                                                v-model:value="accessoryRequirementOrder.comment"
+                                                                type="textarea"
+                                                        >
+                                                        </sw-textarea-field>
+                                                    </template>
+                                                </dd>
+                                            </sw-description-list>
+
+                                        </sw-card-section>
+                                    {% endblock %}
+
+                                </sw-container>
+                            </template>
+                        {% endblock %}
+
+                    </sw-card>
+                {% endblock %}
+
+                {% block accessory_requirement_detail_content_customfields %}
+                    <sw-card v-if="accessoryRequirementOrder && !accessoryRequirementOrder._isNew && sets && sets.length > 0" :isLoading="isLoading"
+                             :title="$tc('sw-settings-custom-field.general.mainMenuItemGeneral')">
+                        <sw-custom-field-set-renderer
+                            :entity="accessoryRequirementOrder"
+                            :disabled="!editMode"
+                            showCustomFieldSetSelection
+                            :sets="sets">
+                        </sw-custom-field-set-renderer>
+                    </sw-card>
+                {% endblock %}
+            </sw-card-view>
+        </template>
+    </sw-page>
+{% endblock %}

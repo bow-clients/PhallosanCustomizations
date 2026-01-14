@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <service id="PhallosanCustomizations\Command\Snippets\LoadSnippetsFromFile">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Command\Import\ImportVatAndDutiesCommand">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Command\Import\ImportNewsletterReceiverCommand">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Command\Import\ImportShippingPricesCommand">
+            <argument type="service" id="PhallosanCustomizations\Import\ImportShippingPricesService"/>
+            <tag name="console.command"/>
+        </service>
+
+    </services>
+</container>

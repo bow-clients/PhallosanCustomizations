@@ -1,0 +1,9 @@
+{% block sw_order_select_document_type_modal_document_types %}
+    <sw-radio-field
+        v-if="!isLoading && documentTypes.length"
+        v-model:value="documentType"
+        :options="filteredDocumentTypes"
+        class="sw-order-select-document-type-modal__radio-field"
+        @update:value="onRadioFieldChange"
+    />
+{% endblock %}

@@ -1,0 +1,1 @@
+"use strict";(window["webpackJsonpPluginphallosan-customizations"]=window["webpackJsonpPluginphallosan-customizations"]||[]).push([[501],{501:function(n,o,t){t.r(o),t.d(o,{default:function(){return s}});var s={template:"<slot></slot>"}}}]);

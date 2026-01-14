@@ -1,0 +1,25 @@
+{
+    "name": "phallosan/customizations",
+    "description": "Phallosan Customizations Plugin",
+    "type": "shopware-platform-plugin",
+    "version": "0.0.2",
+    "license": "MIT",
+    "require": {
+        "shopware/core": "6.6.*",
+        "netinventors/next-language-detector": "6.5.0",
+        "shopware/commercial": "*"
+    },
+    "extra": {
+        "shopware-plugin-class": "PhallosanCustomizations\\PhallosanCustomizations",
+        "label": {
+            "de-DE": "Phallosan Customizations Plugin",
+            "en-GB": "Phallosan Customizations Plugin"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "PhallosanCustomizations\\": "src/",
+            "PhallosanCustomizations\\Tests\\": "tests/"
+        }
+    }
+}

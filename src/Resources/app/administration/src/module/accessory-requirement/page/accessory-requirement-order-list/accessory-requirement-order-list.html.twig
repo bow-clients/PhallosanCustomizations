@@ -1,0 +1,108 @@
+{% block accessory_requirement_order_list %}
+    <sw-page class="accessory-requirement-order-list has--sidebar-menu">
+        {% block accessory_requirement_order_list_smart_bar_header %}
+            <template #smart-bar-header>
+                {% block accessory_requirement_order_list_smart_bar_header_title %}
+                    <h2>
+                        {% block sw_promotion_v2_list_smart_bar_header_title_text %}
+                            {{ $tc('accessory-requirement.order.list.title') }}
+                        {% endblock %}
+
+                        {% block sw_promotion_v2_list_smart_bar_header_title_amount %}
+                            <span
+                                    v-if="!isLoading"
+                                    class="sw-page__smart-bar-amount"
+                            >
+                                ({{ total }})
+                            </span>
+                        {% endblock %}
+                    </h2>
+                {% endblock %}
+            </template>
+        {% endblock %}
+        {% block accessory_requirement_order_list_smart_bar_actions %}
+            <template #smart-bar-actions>
+                <sw-button variant="primary"
+                           :routerLink="{ name: 'accessory.requirement.order_create' }"
+                >
+                    {{ $t('accessory-requirement.list.addButton') }}
+                </sw-button>
+            </template>
+        {% endblock %}
+
+        <template #content>
+            {% block accessory_requirement_order_list_content_sidebar %}
+                <accessory-requirement-sidebar-menu/>
+            {% endblock %}
+
+            {% block accessory_requirement_order_list_content %}
+                <sw-entity-listing
+                        v-if="accessoryRequirementOrders"
+                        :items="accessoryRequirementOrders"
+                        :repository="accessoryRequirementOrderRepository"
+                        :showSelection="false"
+                        :sortBy="sortBy"
+                        :columns="columns"
+                        detail-route="accessory.requirement.order_detail">
+
+                    {% block accessory_requirement_order_list_content_column_redeemed %}
+                        <template #column-redeemed="{ item }">
+                            <sw-icon
+                                    v-if="item.redeemedAt"
+                                    name="regular-checkmark-xs"
+                                    small
+                                    class="is--active"
+                            />
+                            <sw-icon
+                                    v-else
+                                    name="regular-times-s"
+                                    small
+                                    class="is--inactive"
+                            />
+                        </template>
+                    {% endblock %}
+                    {% block accessory_requirement_order_list_content_column_redeemed_at %}
+                        <template #column-redeemedAt="{ item }">
+                            <sw-time-ago v-if="item.redeemedAt" :date="item.redeemedAt" />
+                            <div v-else class="text-center">&ndash;</div>
+                        </template>
+                    {% endblock %}
+                    {% block accessory_requirement_order_list_content_column_order_number %}
+                        <template #column-redeemedOrderNumber="{ item }">
+                            <div v-if="item.redeemedOrderNumber">{{ item.redeemedOrderNumber }}</div>
+                            <div v-else class="text-center">&ndash;</div>
+                        </template>
+                    {% endblock %}
+
+{#                    <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->#}
+{#                    {% block accessory_requirement_order_list_content_columns_actions %}#}
+{#                        <template #more-actions="{ item }">#}
+{#                            <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->#}
+{#                            {% block sw_product_list_grid_columns_actions_open_variant %}#}
+{#                                <sw-context-menu-item#}
+{#                                        v-if="productHasVariants(item)"#}
+{#                                        @click="openVariantModal(item)"#}
+{#                                >#}
+{#                                    {{ $tc('sw-product.list.contextMenuShowVariants') }}#}
+{#                                </sw-context-menu-item>#}
+{#                            {% endblock %}#}
+{#                        </template>#}
+{#                    {% endblock %}#}
+                </sw-entity-listing>
+            {% endblock %}
+        </template>
+
+        <template #sidebar>
+            <sw-sidebar>
+                <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
+                {% block accessory_requirement_order_list_sidebar_refresh %}
+                    <sw-sidebar-item
+                            icon="regular-undo"
+                            :title="$tc('sw-product.list.titleSidebarItemRefresh')"
+                            @click="onRefresh"
+                    />
+                {% endblock %}
+            </sw-sidebar>
+        </template>
+    </sw-page>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% block sw_settings_tax_rule_modal_form_second_row %}
+    {% parent %}
+    {% block sw_settings_tax_rule_modal_form_custom_row %}
+        <sw-container
+            columns="1fr 1fr"
+            gap="0 32px"
+        >
+            {% block sw_settings_tax_rule_modal_form_custom_row_custom_duty %}
+                <sw-number-field
+                    v-model:value="customsDuty"
+                    :digits="3"
+                    :label="$tc('sw-settings-tax.taxRuleCard.labelCustomsTax')"
+                >
+                    <template #suffix>
+                        <span>
+                            <span v-html="$sanitize($tc('sw-settings-tax.general.taxRateSymbol'))"></span>
+                        </span>
+                    </template>
+                </sw-number-field>
+            {% endblock %}
+
+            {% block sw_settings_tax_rule_modal_form_custom_row_import_vat %}
+                <sw-number-field
+                    v-model:value="importVat"
+                    :digits="3"
+                    :label="$tc('sw-settings-tax.taxRuleCard.labelImportVat')"
+                >
+                    <template #suffix>
+                        <span>
+                            <span v-html="$sanitize($tc('sw-settings-tax.general.taxRateSymbol'))"></span>
+                        </span>
+                    </template>
+                </sw-number-field>
+            {% endblock %}
+        </sw-container>
+    {% endblock %}
+    {% block sw_settings_tax_rule_modal_form_custom_apply_row %}
+        <sw-container
+            columns="1fr 1fr"
+            gap="0 32px"
+        >
+            {% block sw_settings_tax_rule_modal_form_custom_row_apply_custom_duty %}
+                <sw-checkbox-field
+                    v-model:value="applyCustomsDuty"
+                    :label="$tc('sw-settings-tax.taxRuleCard.labelApplyCustomsTax')"
+                />
+            {% endblock %}
+
+            {% block sw_settings_tax_rule_modal_form_custom_row_apply_import_vat %}
+                <sw-checkbox-field
+                    v-model:value="applyImportVat"
+                    :label="$tc('sw-settings-tax.taxRuleCard.labelApplyImportVat')"
+                />
+            {% endblock %}
+        </sw-container>
+    {% endblock %}
+{% endblock %}

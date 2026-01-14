@@ -1,0 +1,137 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="PhallosanCustomizations\DataExport\Service\ExportMailerService">
+            <argument type="service" id="Shopware\Core\Content\Mail\Service\MailService" />
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService" />
+            <argument type="service" id="mail_template.repository"/>
+            <argument type="service" id="sales_channel.repository" />
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <service id="PhallosanCustomizations\Command\RunMonthlySalesExporterCommand">
+            <tag name="console.command" />
+            <argument type="service" id="PhallosanCustomizations\DataExport\MonthlySales\MonthlySalesExporterTaskHandler" />
+        </service>
+
+        <!-- Monthly Export -->
+        <service id="PhallosanCustomizations\DataExport\MonthlySales\MonthlySalesExporterTask">
+            <tag name="shopware.scheduled.task" />
+        </service>
+
+        <service id="PhallosanCustomizations\DataExport\MonthlySales\MonthlySalesExporterTaskHandler">
+            <argument type="service" id="PhallosanCustomizations\DataExport\MonthlySales\MonthlySalesExporterService" />
+            <argument type="service" id="scheduled_task.repository" />
+            <tag name="messenger.message_handler" />
+        </service>
+
+        <service id="PhallosanCustomizations\DataExport\MonthlySales\MonthlySalesExporterService">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="PhallosanCustomizations\DataExport\Service\ExportMailerService" />
+        </service>
+
+
+        <!-- Patent Export -->
+        <service id="PhallosanCustomizations\DataExport\PatentLicences\PatentLicencesExporterTask">
+            <tag name="shopware.scheduled.task" />
+        </service>
+
+        <service id="PhallosanCustomizations\DataExport\PatentLicences\PatentLicencesExporterTaskHandler">
+            <argument type="service" id="PhallosanCustomizations\DataExport\PatentLicences\PatentLicencesExporterService" />
+            <argument type="service" id="scheduled_task.repository" />
+            <tag name="messenger.message_handler" />
+        </service>
+
+        <service id="PhallosanCustomizations\DataExport\PatentLicences\PatentLicencesExporterService">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="PhallosanCustomizations\DataExport\Service\ExportMailerService" />
+        </service>
+
+        <!-- Goodwill deliveries -->
+        <service id="PhallosanCustomizations\DataExport\GoodwillDeliveries\MonthlyGoodWillDeliveriesTask">
+            <tag name="shopware.scheduled.task" />
+        </service>
+
+        <service id="PhallosanCustomizations\DataExport\GoodwillDeliveries\MonthlyGoodWillDeliveriesTaskHandler">
+            <argument type="service" id="PhallosanCustomizations\DataExport\GoodwillDeliveries\MonthlyGoodWillDeliveriesService" />
+            <argument type="service" id="scheduled_task.repository" />
+            <tag name="messenger.message_handler" />
+        </service>
+
+        <service id="PhallosanCustomizations\DataExport\GoodwillDeliveries\MonthlyGoodWillDeliveriesService">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="PhallosanCustomizations\DataExport\Service\ExportMailerService" />
+        </service>
+
+        <!-- TaxOffice Export -->
+            <!-- Monthly Export Sales -->
+                <!-- EU Export -->
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesEu\MonthlySalesExporterEuTask">
+                    <tag name="shopware.scheduled.task" />
+                </service>
+
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesEu\MonthlySalesExporterEuTaskHandler">
+                    <argument type="service" id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesExportService" />
+                    <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+                    <argument type="service" id="scheduled_task.repository" />
+                    <tag name="messenger.message_handler" />
+                </service>
+
+                <!-- World Export -->
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesWorld\MonthlySalesExporterWorldTask">
+                    <tag name="shopware.scheduled.task" />
+                </service>
+
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesWorld\MonthlySalesExporterWorldTaskHandler">
+                    <argument type="service" id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesExportService" />
+                    <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+                    <argument type="service" id="scheduled_task.repository" />
+                    <tag name="messenger.message_handler" />
+                </service>
+
+            <!-- Monthly Export Cancellations -->
+                <!-- EU Export -->
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\CancelledDe\MonthlyCancelledExporterTask">
+                    <tag name="shopware.scheduled.task"/>
+                </service>
+
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\CancelledDe\MonthlyCancelledExporterTaskHandler">
+                    <argument type="service" id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesExportService" />
+                    <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+                    <argument type="service" id="scheduled_task.repository" />
+                    <tag name="messenger.message_handler" />
+                </service>
+                <!-- World Export -->
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\CancelledWorld\MonthlyCancelledExporterWorldTask">
+                    <tag name="shopware.scheduled.task"/>
+                </service>
+
+                <service id="PhallosanCustomizations\DataExport\TaxOffice\CancelledWorld\MonthlyCancelledExporterWorldTaskHandler">
+                    <argument type="service" id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesExportService" />
+                    <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+                    <argument type="service" id="scheduled_task.repository" />
+                    <tag name="messenger.message_handler" />
+                </service>
+
+            <!-- Service -->
+            <service id="PhallosanCustomizations\DataExport\TaxOffice\MonthlySalesExportService">
+                <argument type="service" id="order.repository"/>
+                <argument type="service" id="PhallosanCustomizations\DataExport\Service\AdditionalHelper"/>
+                <argument type="service" id="PhallosanCustomizations\DataExport\Service\ExportMailerService" />
+                <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            </service>
+
+
+        <!-- Helper -->
+        <service id="PhallosanCustomizations\DataExport\Service\AdditionalHelper">
+            <argument type="service" id="country.repository"/>
+        </service>
+    </services>
+</container>

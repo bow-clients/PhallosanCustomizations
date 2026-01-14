@@ -1,0 +1,81 @@
+{% block accessory_requirement_detail %}
+    <sw-page class="accessory-requirement-detail">
+        <template #smart-bar-actions>
+            {% block accessory_requirement_detail_smart_bar_actions %}
+                <sw-button :routerLink="{ name: 'accessory.requirement.list' }">
+                    {{ $t('accessory-requirement.detail.backBtn') }}
+                </sw-button>
+
+                <sw-button-process
+                        v-if="accessoryRequirement"
+                        :isLoading="isLoading"
+                        :processSuccess="processSuccess"
+                        :disabled="!isValid"
+                        variant="primary"
+                        @process-finish="saveFinish"
+                        @click="onClickSave">
+                    {{ $t('accessory-requirement.detail.saveBtn') }}
+                </sw-button-process>
+            {% endblock %}
+        </template>
+
+        <template #content>
+            <sw-card-view>
+                {% block accessory_requirement_detail_content %}
+                    <sw-card
+                            v-if="accessoryRequirement"
+                            :isLoading="isLoading"
+                            :title="$t('accessory-requirement.detail.title')"
+                            :subtitle="!isValid ? $tc('accessory-requirement.detail.hint'): null"
+                    >
+                        <sw-text-field
+                                :label="$t('accessory-requirement.detail.name')"
+                                v-model:value="accessoryRequirement.name"
+                                validation="required"
+                                :disabled="!accessoryRequirement._isNew"
+                                :error="accessoryRequirementNameError"
+                                required
+                        />
+                        <sw-textarea-field
+                                :label="$t('accessory-requirement.detail.description')"
+                                v-model:value="accessoryRequirement.description"
+                                type="textarea"
+                        />
+                        <sw-entity-single-select
+                                id="product"
+                                :disabled="!accessoryRequirement._isNew"
+                                v-model:value="accessoryRequirement.productId"
+                                entity="product"
+                                required
+                                :label="$t('accessory-requirement.detail.product')"
+                        />
+                        <sw-entity-single-select
+                                id="requiredProduct"
+                                :disabled="!accessoryRequirement._isNew"
+                                v-model:value="accessoryRequirement.requiredProductId"
+                                entity="product"
+                                required
+                                :label="$t('accessory-requirement.detail.requiredProduct')"
+                        />
+
+                        <sw-snippet-field
+                                :snippet="snippetName"
+                                :label="$t('accessory-requirement.detail.errorMessageSnippet')"/>
+                    </sw-card>
+                {% endblock %}
+                {% block accessory_requirement_detail_content_customfields %}
+                    <sw-card v-if="accessoryRequirement && sets && sets.length > 0" :isLoading="isLoading"
+                             :title="$tc('sw-settings-custom-field.general.mainMenuItemGeneral')">
+                        <sw-custom-field-set-renderer
+                                :entity="accessoryRequirement"
+                                showCustomFieldSetSelection
+                                :sets="sets">
+                        </sw-custom-field-set-renderer>
+
+                    </sw-card>
+                {% endblock %}
+            </sw-card-view>
+
+        </template>
+    </sw-page>
+{% endblock %}

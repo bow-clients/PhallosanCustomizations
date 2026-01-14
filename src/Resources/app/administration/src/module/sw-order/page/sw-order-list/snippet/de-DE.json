@@ -1,0 +1,12 @@
+{
+  "orderList": {
+    "duplicate": {
+      "menuTitle": "Duplizieren",
+      "modal": {
+        "title": "Bestellung duplizieren",
+        "description": "Möchten Sie diese Bestellung ({orderNumber}) wirklich duplizieren?",
+        "buttonDuplicate": "Bestellung duplizieren"
+      }
+    }
+  }
+}

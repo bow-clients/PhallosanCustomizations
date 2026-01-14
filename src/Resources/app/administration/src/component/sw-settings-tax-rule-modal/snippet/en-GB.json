@@ -1,0 +1,10 @@
+{
+  "sw-settings-tax": {
+    "taxRuleCard": {
+      "labelCustomsTax": "Customs fee",
+      "labelImportVat": "Import vat",
+      "labelApplyImportVat": "Apply customs fee in cart",
+      "labelApplyCustomsTax": "Apply import vat in cart"
+    }
+  }
+}

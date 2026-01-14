@@ -1,0 +1,61 @@
+{
+  "global": {
+    "entities": {
+      "accessory_requirement": "Accessory Requirement",
+      "accessory_requirement_order": "Zubehör Requirement - Order"
+    }
+  },
+  "accessory-requirement": {
+    "mainMenuItem": "Accessory Requirement",
+    "descriptionTextModule": "Overview of all products that can only be purchased under certain conditions",
+    "sidebar": {
+      "menu": {
+        "overview": "Overview",
+        "orders": "Orders"
+      }
+    },
+    "order": {
+      "detail": {
+        "accessoryProduct": "Accessory Product",
+        "requiredProduct": "Required Product",
+        "orderNumber": "Ordernumber",
+        "redeemedOrderNumber": "Redeemed in Order",
+        "comment": "Comment",
+        "active": "Active",
+        "migrated": "Migrated",
+        "migratedAt": "Migrated at",
+        "createdAt": "Created at",
+        "updatedAt": "Updated at",
+        "buttonEdit": "Edit",
+        "buttonCancel": "Cancel"
+      },
+      "list": {
+        "title": "Orders",
+        "accessoryRequirementProduct": "Accessory Product",
+        "orderNumber": "Ordernumber",
+        "redeemedOrderNumber": "Redeemed in Order",
+        "redeemedAt": "Redeemed at",
+        "redeemed": "Redeemed"
+      }
+    },
+    "list": {
+      "refresh": "Refresh",
+      "title": "Accessory Products with Requirements",
+      "addButton": "Add",
+      "name": "Name",
+      "description": "Description"
+    },
+    "detail": {
+      "title": "Accessory Product with Requirements",
+      "hint": "Accessory products can only be purchased in combination with other products. If these are purchased separately, the order number of an order with the required \"main\" product must be specified in the order process.",
+      "name": "Name",
+      "description": "Description",
+      "backBtn": "Back to Overview",
+      "saveBtn": "Save",
+      "product": "Accessory Product",
+      "requiredProduct": "Required Product",
+      "errorMessageSnippet": "Snippet for the Error Message",
+      "errorMessageSnippetHelpText": "If this Snippet is not empty, this will be the Error Message if the Conditions for this Accessoire are not fulfilled"
+    }
+  }
+}

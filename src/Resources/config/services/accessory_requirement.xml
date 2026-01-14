@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <!-- Entity Definitions -->
+        <service id="PhallosanCustomizations\AccessoryRequirement\DAL\AccessoryRequirement\AccessoryRequirementDefinition">
+            <tag name="shopware.entity.definition" entity="accessory_requirement" />
+        </service>
+
+        <service id="PhallosanCustomizations\AccessoryRequirement\DAL\AccessoryRequirementOrder\AccessoryRequirementOrderDefinition">
+            <tag name="shopware.entity.definition" entity="accessory_requirement_order" />
+        </service>
+
+        <!-- Extensions -->
+        <service id="PhallosanCustomizations\AccessoryRequirement\DAL\AccessoryRequirement\Extensions\ProductExtension">
+            <tag name="shopware.entity.extension"/>
+        </service>
+
+        <!-- Services -->
+        <service id="PhallosanCustomizations\AccessoryRequirement\Service\AccessoryRequirementService">
+            <argument type="service" id="Doctrine\DBAL\Connection" />
+            <argument type="service" id="accessory_requirement.repository" />
+            <argument type="service" id="accessory_requirement_order.repository" />
+            <argument type="service" id="order.repository" />
+        </service>
+
+        <!-- Cart Validator -->
+        <service id="PhallosanCustomizations\AccessoryRequirement\Checkout\Cart\Validation\AccessoryRequirementValidator">
+            <argument type="service" id="PhallosanCustomizations\AccessoryRequirement\Service\AccessoryRequirementService" />
+            <argument type="service" id="Shopware\Core\Framework\Adapter\Translation\Translator"/>
+            <tag name="shopware.cart.validator"/>
+        </service>
+
+        <!-- Cart Collector -->
+        <service id="PhallosanCustomizations\AccessoryRequirement\Checkout\Cart\Collector\AccessoryRequirementCartCollector">
+            <argument type="service" id="PhallosanCustomizations\AccessoryRequirement\Service\AccessoryRequirementService" />
+            <tag name="shopware.cart.collector"/>
+        </service>
+
+        <!-- Subscribers -->
+        <service id="PhallosanCustomizations\AccessoryRequirement\Subscriber\ProductLoadedSubscriber">
+            <argument type="service" id="PhallosanCustomizations\AccessoryRequirement\Service\AccessoryRequirementService" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+        <service id="PhallosanCustomizations\AccessoryRequirement\Subscriber\CheckoutOrderSubscriber">
+            <argument type="service" id="PhallosanCustomizations\AccessoryRequirement\Service\AccessoryRequirementService" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Controller -->
+        <service id="PhallosanCustomizations\AccessoryRequirement\Storefront\Checkout\CartLineItemAccessoryRequirementController"
+                 public="true">
+            <argument type="service" id="PhallosanCustomizations\AccessoryRequirement\Service\AccessoryRequirementService" />
+            <argument type="service" id="Shopware\Core\Checkout\Cart\CartPersister"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <call method="setTwig">
+                <argument type="service" id="twig"/>
+            </call>
+        </service>
+
+
+    </services>
+</container>

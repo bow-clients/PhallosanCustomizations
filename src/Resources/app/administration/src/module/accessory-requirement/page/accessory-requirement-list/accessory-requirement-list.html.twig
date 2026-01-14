@@ -1,0 +1,65 @@
+{% block accessory_requirement_list %}
+    <sw-page class="accessory-requirement-list has--sidebar-menu">
+        {% block accessory_requirement_list_smart_bar_header %}
+            <template #smart-bar-header>
+                {% block accessory_requirement_list_smart_bar_header_title %}
+                    <h2>
+                        {% block sw_promotion_v2_list_smart_bar_header_title_text %}
+                            {{ $tc('accessory-requirement.list.title') }}
+                        {% endblock %}
+
+                        {% block sw_promotion_v2_list_smart_bar_header_title_amount %}
+                            <span
+                                    v-if="!isLoading"
+                                    class="sw-page__smart-bar-amount"
+                            >
+                                ({{ total }})
+                            </span>
+                        {% endblock %}
+                    </h2>
+                {% endblock %}
+            </template>
+        {% endblock %}
+        {% block accessory_requirement_list_smart_bar_actions %}
+            <template #smart-bar-actions>
+                <sw-button variant="primary"
+                           :routerLink="{ name: 'accessory.requirement.create' }"
+                >
+                    {{ $t('accessory-requirement.list.addButton') }}
+                </sw-button>
+            </template>
+        {% endblock %}
+
+        <template #content>
+            {% block accessory_requirement_list_content_sidebar %}
+                <accessory-requirement-sidebar-menu/>
+            {% endblock %}
+
+
+            {% block accessory_requirement_list_content %}
+                <sw-entity-listing
+                        v-if="accessoryRequirements"
+                        :items="accessoryRequirements"
+                        :repository="repository"
+                        :showSelection="false"
+                        :sortBy="sortBy"
+                        :columns="columns"
+                        detailRoute="accessory.requirement.detail">
+                </sw-entity-listing>
+            {% endblock %}
+        </template>
+
+        <template #sidebar>
+            <sw-sidebar>
+                <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
+                {% block accessory_requirement_list_sidebar_refresh %}
+                    <sw-sidebar-item
+                            icon="regular-undo"
+                            :title="$tc('sw-product.list.titleSidebarItemRefresh')"
+                            @click="onRefresh"
+                    />
+                {% endblock %}
+            </sw-sidebar>
+        </template>
+    </sw-page>
+{% endblock %}

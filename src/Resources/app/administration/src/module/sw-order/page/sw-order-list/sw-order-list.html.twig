@@ -1,0 +1,45 @@
+{% block sw_order_list_grid_columns_actions_view %}
+    {% parent %}
+    <sw-context-menu-item
+            @click="onDuplicate(item.id)"
+    >
+        {{ $tc('orderList.duplicate.menuTitle') }}
+    </sw-context-menu-item>
+{% endblock %}
+
+{% block sw_order_list_delete_modal %}
+    {% parent %}
+    <sw-modal
+            v-if="showDuplicateModal === item.id"
+            :title="$tc('orderList.duplicate.modal.title')"
+            variant="small"
+            @modal-close="onCloseDuplicateModal"
+    >
+        <p class="sw-order-list__confirm-delete-text">
+            {{ $tc('orderList.duplicate.modal.description', 0, { orderNumber: `${item.orderNumber}` }) }}
+        </p>
+
+        <template #modal-footer>
+            <sw-button
+                    size="small"
+                    @click="onCloseDuplicateModal"
+            >
+                {{ $tc('global.default.cancel') }}
+                </sw-button>
+
+                <sw-button
+                variant="primary"
+                size="small"
+                @click="onConfirmDuplicate(item)"
+                >
+                {{ $tc('orderList.duplicate.modal.buttonDuplicate') }}
+            </sw-button>
+        </template>
+    </sw-modal>
+{% endblock %}
+
+{% block sw_order_list_grid_columns_amount %}
+    <template #column-amountTotal="{ item }">
+        {{ currencyFilter(item.amountTotal, item.currency.isoCode, item.itemRounding.decimals) }}
+    </template>
+{% endblock %}<

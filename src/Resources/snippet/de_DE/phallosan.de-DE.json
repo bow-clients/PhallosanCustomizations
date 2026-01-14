@@ -1,0 +1,24 @@
+{
+  "checkout": {
+    "accessory-required-product-missing": "Dieses Produkt ist nur in Kombination mit anderen Produkten kaufbar.",
+    "accessory-required-product-ordernumber": "Bestellnummer:",
+    "accessory-required-product-ordernumber-valid": "Bestellnummer ist für den Kauf gültig.",
+    "accessory-required-product-ordernumber-invalid": "Die eingegebene Bestellnummer ist nicht gültig.",
+    "accessory-required-product-ordernumber-removed": "Bestellnummer wurde entfernt.",
+    "accessory-required-product-ordernumber-remove-failed": "Bestellnummer konnte nicht entfernt werden.",
+    "customsDuty": {
+      "label": "Zollgebühren",
+      "invalidCart": "Der Warenkorb besitzt einen ungültigen Zollwert."
+    },
+    "importVat": {
+      "label": "Einfuhrsteuer"
+    }
+  },
+  "magmodules-shopreview": {
+    "form": {
+      "review": {
+        "success": "Ihre Bewertung wurde erfolgreich übermittelt! Vielen Dank!"
+      }
+    }
+  }
+}

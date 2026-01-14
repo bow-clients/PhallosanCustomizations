@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="PhallosanCustomizations\Decorator\Account\AccountProfileControllerDecorator"
+                 decorates="Shopware\Storefront\Controller\AccountProfileController"
+                 public="true">
+            <argument type="service" id="Shopware\Storefront\Page\Account\Overview\AccountOverviewPageLoader"/>
+            <argument type="service" id="Shopware\Storefront\Page\Account\Profile\AccountProfilePageLoader"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\ChangeCustomerProfileRoute"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\ChangePasswordRoute"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\ChangeEmailRoute"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\DeleteCustomerRoute"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="PhallosanCustomizations\Core\Seo\SeoUrlGeneratorDecorator" decorates="Shopware\Core\Content\Seo\SeoUrlGenerator">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="router.default"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="shopware.seo_url.twig"/>
+            <argument type="service" id="Shopware\Core\Framework\Adapter\Twig\TwigVariableParserFactory"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="PhallosanCustomizations\LanguagePopUp\Decorator\LanguageDetectorControllerDecorator"
+                 decoration-on-invalid="ignore"
+                 decorates="NetInventors\NetiNextLanguageDetector\Storefront\Controller\LanguageDetectorController">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <argument type="service" id="sales_channel_domain.repository"/>
+            <argument type="service" id="neti_language_detector.plugin_config"/>
+            <argument type="service" id="NetInventors\NetiNextLanguageDetector\Service\LanguageDetectorService"/>
+            <argument type="service" id="NetInventors\NetiNextLanguageDetector\Service\LogService"/>
+            <argument type="service" id="Shopware\Core\Framework\Adapter\Translation\Translator"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextPersister" />
+        </service>
+
+        <service id="PhallosanCustomizations\LanguagePopUp\Decorator\LanguageDetectorServiceDecorator"
+                 decoration-on-invalid="ignore"
+                 decorates="NetInventors\NetiNextLanguageDetector\Service\LanguageDetectorService">
+            <argument type="service" id="language.repository"/>
+            <argument type="service" id="sales_channel_domain.repository"/>
+            <argument type="service" id="product_visibility.repository"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Decorator\Country\CountryRouteDecorator"
+                 decorates="Shopware\Core\System\Country\SalesChannel\CountryRoute">
+            <argument type="service" id="country.repository"/>
+            <argument type="service" id="sales_channel.country.repository"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Decorator\ShopReview\MagmodulesShopreviewControllerDecorator"
+                 decorates="Magmodules\Shopreview\Storefront\Controller\MagmodulesShopreviewController"
+                 decoration-priority="100"
+                 public="true">
+            <argument type="service" id="PhallosanCustomizations\Decorator\ShopReview\MagmodulesShopreviewControllerDecorator.inner"/>
+            <argument type="service" id="translator"/>
+            <argument type="service" id="twig"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Decorator\Register\RegisterRouteDecorator"
+                decorates="Shopware\Core\Checkout\Customer\SalesChannel\RegisterRoute"
+                public="true">
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Shopware\Core\System\NumberRange\ValueGenerator\NumberRangeValueGeneratorInterface"/>
+            <argument type="service" id="Shopware\Core\Framework\Validation\DataValidator"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\Validation\CustomerValidationFactory"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\Validation\AddressValidationFactory"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="customer.repository"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextPersister"/>
+            <argument type="service" id="sales_channel.country.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\StoreApiCustomFieldMapper"/>
+            <argument type="service" id="salutation.repository"/>
+
+            <argument type="service" id="country.repository"/>
+        </service>
+
+        <service id="PhallosanCustomizations\Decorator\Checkout\Cart\AddressValidatorDecorator"
+            decorates="Shopware\Core\Checkout\Cart\Address\AddressValidator">
+        </service>
+
+    </services>
+</container>

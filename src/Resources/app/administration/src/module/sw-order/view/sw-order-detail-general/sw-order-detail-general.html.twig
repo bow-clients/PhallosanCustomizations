@@ -1,0 +1,236 @@
+{% block sw_order_detail_general_info_card %}
+    {% parent %}
+
+    {% block sw_order_detail_general_address_info %}
+        <sw-card :title="$tc('orderCustomer.detail.address')"
+                 class="sw-order-detail-base__address-info"
+                 position-identifier="sw-order-detail-address-info">
+
+            <template #grid>
+                {% block order_addresses_container %}
+                    <sw-container
+                        class="order-addresses"
+                        columns="repeat(auto-fit, minmax(250px, 1fr))"
+                    >
+                        {% block order_addresses_shipping %}
+                            <sw-card-section
+                                divider="right"
+                            >
+                                    {% block order_addresses_shipping_postal %}
+                                        <sw-address
+                                            v-if="shippingAddress"
+                                            :address="shippingAddress"
+                                            :headline="$tc('orderCustomer.detail.shippingAddress')"
+                                            :formatting-address="formattingShippingAddress"
+                                        />
+                                    {% endblock %}
+
+                            </sw-card-section>
+                        {% endblock %}
+
+                        {% block order_addresses_billing %}
+                            <sw-card-section v-if="billingAddress">
+
+                                    {% block order_addresses_billing_postal %}
+                                        <sw-address
+                                            :address="billingAddress"
+                                            :headline="$tc('orderCustomer.detail.billingAddress')"
+                                            :formatting-address="formattingBillingAddress"
+                                        />
+                                    {% endblock %}
+
+                            </sw-card-section>
+                        {% endblock %}
+
+                    </sw-container>
+                {% endblock %}
+            </template>
+        </sw-card>
+    {% endblock %}
+
+
+    {% block sw_order_detail_general_tracking_info %}
+        <sw-card :title="$tc('orderCustomer.detail.tackingCodes')"
+            class="sw-order-detail-base__tracking-info"
+            position-identifier="sw-order-detail-tracking-info">
+
+            <div class="sw-order-detail-base__tracking-info-header">
+                <template
+                    v-for="(trackingCode, index) in trackingCodes"
+                    :key="index"
+                >
+                    <dd>
+                        {{ trackingCode }}
+                    </dd>
+                </template>
+            </div>
+        </sw-card>
+    {% endblock %}
+
+    {% block sw_order_detail_general_commision %}
+        <sw-card
+            class="card-affiliate-commssion"
+            :isLoading="isLoading"
+            :title="$tc('dvsn-affiliate-sw-order.order-detail.card-affiliate-commssion.title')"
+            v-if="order"
+        >
+            <sw-data-grid
+                v-if="order && order.extensions && commissions.length > 0"
+                :dataSource="commissions"
+                :columns="commissionsColumns"
+                :fullPage="false"
+                :showSettings="false"
+                :showSelection="false"
+                :showActions="true"
+                :isLoading="isLoading"
+                :allowColumnEdit="false"
+                :allowInlineEdit="false"
+                :compactMode="true"
+                :isRecordEditable="true"
+            >
+                <template #column-createdAt="{ item }">
+                    {{ dateFilter(item.createdAt, {hour: '2-digit', minute: '2-digit', second: '2-digit'}) }} Uhr
+                </template>
+                <template #column-affiliate="{ item }">
+                    <router-link
+                        :to="{ name: 'dvsn.affiliate.detail', params: { id: item.affiliate.id } }"
+                    >
+                        {{ item.affiliate.name }}
+                    </router-link>
+                </template>
+                <template #column-amount="{ item }">
+                    {{ currencyFilter(item.amount, systemCurrencyISOCode) }}
+                </template>
+                <template #column-commission="{ item }">
+                    {{ currencyFilter(item.commission, systemCurrencyISOCode) }}
+                </template>
+                <template #column-commissionRedeemed="{ item }">
+                    {{ currencyFilter(item.commissionRedeemed, systemCurrencyISOCode) }}
+                </template>
+
+                <template #actions="{ item }">
+                    <sw-context-menu-item @click="showCommissionLog(item)">
+                        {{ $tc('dvsn-affiliate-sw-order.order-detail.card-affiliate-commssion.commission-log.action') }}
+                    </sw-context-menu-item>
+                </template>
+            </sw-data-grid>
+
+            <sw-container
+                class="no-commissions"
+                v-if="order && order.extensions && commissions.length == 0 && (order.affiliateCode == '' || order.affiliateCode == null)"
+            >
+                <sw-alert
+                    class="no-commissions-alert"
+                    variant="info">
+                    {{ $tc('dvsn-affiliate-sw-order.order-detail.card-affiliate-commssion.no-partner-alert') }}
+                </sw-alert>
+            </sw-container>
+
+            <sw-container
+                class="no-commissions"
+                v-if="order && order.extensions && commissions.length == 0 && order.affiliateCode != '' && order.affiliateCode != null"
+            >
+
+                <sw-data-grid
+                    v-if="order && order.extensions && pendingCommission"
+                    :dataSource="pendingCommission"
+                    :columns="pendingCommissionsColumns"
+                    :fullPage="false"
+                    :showSettings="false"
+                    :showSelection="false"
+                    :showActions="true"
+                    :isLoading="isLoading"
+                    :allowColumnEdit="false"
+                    :allowInlineEdit="false"
+                    :compactMode="true"
+                    :isRecordEditable="true"
+                >
+                    <template #column-createdAt="{ item }">
+                        {{ dateFilter(item.createdAt, {hour: '2-digit', minute: '2-digit', second: '2-digit'}) }} Uhr
+                    </template>
+                    <template #column-affiliate="{ item }">
+                        <router-link
+                            v-if="pendingCommission"
+                            :to="{ name: 'dvsn.affiliate.detail', params: { id: item.affiliate.id } }"
+                        >
+                            {{ item.name }}
+                        </router-link>
+                    </template>
+                    <template #column-amount="{ item }">
+                        {{ currencyFilter(item.amount, systemCurrencyISOCode) }}
+                    </template>
+                    <template #column-commission="{ item }">
+                        {{ currencyFilter(item.commission, systemCurrencyISOCode) }}
+                    </template>
+                    <template #column-commissionRedeemed="{ item }">
+                        {{ currencyFilter(item.commissionRedeemed, systemCurrencyISOCode) }}
+                    </template>
+
+                    <template #actions="{ item }">
+                        <sw-context-menu-item @click="showCommissionLog(item)">
+                            {{ $tc('dvsn-affiliate-sw-order.order-detail.card-affiliate-commssion.commission-log.action') }}
+                        </sw-context-menu-item>
+                    </template>
+                </sw-data-grid>
+            </sw-container>
+
+            <sw-modal
+                v-if="showCommissionLogModal"
+                @modal-close="closeCommissionLogModal"
+                :title="$tc('dvsn-affiliate-sw-order.order-detail.card-affiliate-commssion.commission-log.modal.title')"
+                class="dvsn-affiliate-sw-order-commission-log-modal"
+            >
+                <sw-alert
+                    class="no-commissions-alert"
+                    variant="info">
+                    {{ $tc('dvsn-affiliate-sw-order.order-detail.card-affiliate-commssion.commission-log.modal.alert') }}
+                </sw-alert>
+
+                <sw-textarea-field
+                    :value="commissionLogModalString">
+                </sw-textarea-field>
+
+                <template #modal-footer>
+                    <sw-button size="small" @click="closeCommissionLogModal">
+                        {{ $tc('sw-settings-logging.entryInfo.actionClose') }}
+                    </sw-button>
+                </template>
+            </sw-modal>
+        </sw-card>
+    {% endblock %}
+
+{% endblock %}
+
+{% block sw_order_detail_general_line_items_card %}
+    {% parent %}
+
+    {% block sw_order_detail_general_return %}
+        <div class="swag-return-management-detail-returns">
+            <div v-for="item in orderReturns">
+                <swag-return-management-return-card
+                    :key="item.id + '-' + order.versionId"
+                    :item="item"
+                    @reload-order="reloadOrder"
+                    @save-order="saveOrder"
+                />
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}
+
+{% block sw_order_detail_general_line_items_card %}
+    {% parent %}
+
+    {% block sw_order_detail_general_comments %}
+        <sw-card :title="$tc('phallosan-customizations.order.comments.title')"
+                 class="sw-order-detail-base__comments"
+                 position-identifier="sw-order-detail-comments">
+            <template #grid>
+                <div class="sw-order-delivery-section">
+                    <sw-order-comments>
+                    </sw-order-comments>
+                </div>
+            </template>
+        </sw-card>
+    {% endblock %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{
+  "checkout": {
+    "accessory-required-product-missing": "This Product is only purchasable in combination with another Product.",
+    "accessory-required-product-ordernumber": "Order number:",
+    "accessory-required-product-ordernumber-valid": "The OrderNumber is valid.",
+    "accessory-required-product-ordernumber-invalid": "The OrderNumber is invalid.",
+    "accessory-required-product-ordernumber-removed": "Order number has been removed.",
+    "accessory-required-product-ordernumber-remove-failed": "Order number could not be removed.",
+    "customsDuty": {
+      "label": "Customs Duty",
+      "invalidCart": "The cart has an invalid customs duty value."
+    },
+    "importVat": {
+      "label": "Import Vat"
+    }
+  },
+  "magmodules-shopreview": {
+    "form": {
+      "review": {
+        "success": "Your review has been successfully submitted! Thank you for your feedback."
+      }
+    }
+  }
+}

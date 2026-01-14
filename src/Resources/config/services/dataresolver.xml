@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="PhallosanCustomizations\DataResolver\CmsFactoryReviewElementResolver">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService" on-invalid="ignore"/>
+            <argument type="service" id="Magmodules\Shopreview\Core\Content\MagmodulesShopreview\Review\SalesChannel\ReviewListRoute" on-invalid="ignore"/>
+            <argument type="service" id="magmodules_shopreview_review_form.repository" on-invalid="ignore"/>
+
+            <tag name="shopware.cms.data_resolver"/>
+        </service>
+    </services>
+</container>

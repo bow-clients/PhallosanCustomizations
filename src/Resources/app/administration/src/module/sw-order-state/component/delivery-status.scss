@@ -1,0 +1,62 @@
+#state.undeliverable {
+    .sw-block-field__block {
+        background: #dc3545;
+        color: #fff;
+        border-color: #dc3545;
+
+        input {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+
+            &::placeholder {
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            &:focus {
+                background: rgba(255, 255, 255, 0.15);
+                border-color: rgba(255, 255, 255, 0.5);
+                box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .sw-field__label {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .sw-select__selection-indicators {
+            color: #fff;
+
+            .sw-icon {
+                color: #fff;
+            }
+        }
+
+        .sw-single-select__selection-text {
+            color: #fff;
+        }
+    }
+}
+
+#state.undeliverable {
+    .sw-block-field__block {
+        &:hover {
+            background: #c82333
+        }
+    }
+}
+
+.sw-select-result-list {
+    .sw-select-option {
+        &:contains("Unzustellbar"),
+        &:contains("Undeliverable") {
+            background-color: #dc3545;
+            color: #fff;
+
+            &:hover {
+                background-color: #c82333;
+            }
+        }
+    }
+}

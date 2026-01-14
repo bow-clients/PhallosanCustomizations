@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="PhallosanCustomizations\Bundle\Cart\CartServiceDecorator"
+                decorates="Dvsn\Bundle\Service\Cart\CartService">
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Dvsn\Bundle\Service\Cart\LineItemFactoryService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="Dvsn\Bundle\Service\Bundle\BundleCollectorService" />
+        </service>
+
+        <service id="PhallosanCustomizations\Bundle\ProductPage\ProductPageSubscriberDecorator"
+                 decorates="Dvsn\Bundle\Subscriber\Storefront\Page\Product\ProductPageSubscriber">
+            <argument type="service" id="Dvsn\Bundle\Service\Bundle\BundleCollectorService" />
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService" />
+        </service>
+
+        <service id="PhallosanCustomizations\Bundle\Cart\BundleCartProcessorDecorator"
+                 decorates="Dvsn\Bundle\Core\Checkout\Cart\BundleCartProcessor">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Price\PercentagePriceCalculator"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator"/>
+            <argument type="service" id="Shopware\Core\Checkout\Promotion\Cart\Discount\Composition\DiscountCompositionBuilder"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="Shopware\Core\Content\Product\Cart\ProductGateway"/>
+        </service>
+    </services>
+</container>

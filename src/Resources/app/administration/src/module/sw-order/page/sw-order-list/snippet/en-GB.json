@@ -1,0 +1,12 @@
+{
+  "orderList": {
+    "duplicate": {
+      "menuTitle": "duplicate",
+      "modal": {
+        "title": "Duplicate order",
+        "description": "Do you want to duplicate order ({orderNumber}) ?",
+        "buttonDuplicate": "Duplicate order"
+      }
+    }
+  }
+}

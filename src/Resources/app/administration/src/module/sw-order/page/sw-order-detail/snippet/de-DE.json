@@ -1,0 +1,23 @@
+{
+  "finecom-export": {
+    "order": {
+      "button": {
+        "export": "An FineCom exportieren",
+        "remove": "FineCom Tag entfernen",
+        "processing": "Bitte warten..."
+      },
+      "success": {
+        "tagAdded": "FINECOM_FETCHABLE Tag wurde hinzugefügt. Es wurde der Zahlungsstatus auf \"bezahlt\" - und Bestellstatus auf \"in Bearbeitung\" und eine Rechnung wurde erzeugt. Die Seite lädt gleich neu.",
+        "tagRemoved": "FINECOM_FETCHABLE Tag wurde erfolgreich entfernt."
+      },
+      "error": {
+        "tagNotFound": "FINECOM_FETCHABLE Tag wurde nicht gefunden. Bitte erstellen Sie den Tag zuerst.",
+        "general": "Fehler beim Hinzufügen des FINECOM_FETCHABLE Tags oder beim Setzen des Zahlungsstatus.",
+        "tagRemove": "Fehler beim Entfernen des FINECOM_FETCHABLE Tags."
+      },
+      "warning": {
+        "invoiceFailed": "Automatische Rechnungserstellung fehlgeschlagen. Bitte erstellen Sie die Rechnung manuell über \"Dokumente\"."
+      }
+    }
+  }
+}

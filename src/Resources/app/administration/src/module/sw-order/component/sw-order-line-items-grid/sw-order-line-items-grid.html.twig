@@ -1,0 +1,32 @@
+{% block sw_order_line_items_grid_grid_columns %}
+    {% parent %}
+
+    <template #column-hsCodes="{ item }">
+        <template v-if="isEuOrder">
+            {{ item.customFields?.product_hs_code_eu || item.payload?.customFields?.product_hs_code_eu || '-' }}
+        </template>
+        <template v-else>
+            {{ item.customFields?.product_hs_code_us || item.payload?.customFields?.product_hs_code_us || '-' }}
+        </template>
+    </template>
+{% endblock %}
+
+{% block sw_order_line_items_grid_grid_actions_show %}
+    {% parent %}
+    <sw-context-menu-item
+            @click.stop="open(item)"
+    >
+        {{ $tc('sw-order-line-items-grid.customfield-edit-title') }}
+    </sw-context-menu-item>
+{% endblock %}
+{% block sw_order_line_items_nested_line_item_modal %}
+    {% parent %}
+    <hscode-modal
+            :item="selectedItem"
+            :isEu="isEuOrder"
+            :visible="modalVisible"
+            @close="closeModal"
+            @saved="savedModal"
+            @updated-line-item="updateLineItemInStore"
+    />
+{% endblock %}

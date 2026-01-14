@@ -1,0 +1,108 @@
+{% sw_extends '@Storefront/storefront/layout/header/actions/language-widget.html.twig' %}
+
+{% block layout_header_actions_language_widget %}
+    {% if position is empty %}
+        {% set position = 'top-bar' %}
+    {% endif %}
+
+    <div class="top-bar-nav-item top-bar-language">
+        {% block layout_header_actions_country_widget_form %}
+            {% set currentCountry = getCountries(context.salesChannel.id, context.context) %}
+            {% set languageDomains = getLanguageSwitch(context) %}
+
+            <div class="top-bar-nav-text country-language-switch me-1">{{ 'top-bar.country-switch'|trans }}</div>
+            <form method="post"
+                  action="{{ path('frontend.language_switch.redirect') }}"
+                  class="language-form">
+                {% set position = '###POSITION###-' ~ position %}
+
+                {% block layout_header_actions_countries_widget_content %}
+                    {% set isoCode = currentCountry.iso|lower %}
+                    {% set country = isoCode %}
+
+                    <div class="languages-menu dropdown">
+                        <button class="btn dropdown-toggle top-bar-nav-btn"
+                                type="button"
+                                id="languagesDropdown-{{ position }}"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                aria-label="{{ 'header.languageTrigger'|trans({ '%lang%': currentCountry.translated['name'] })|striptags }}">
+                            {# @deprecated tag:v6.7.0 - Toggling the text display will use Bootstrap helper classes instead of custom CSS. #}
+
+                            <span class="top-bar-nav-text{% if feature('ACCESSIBILITY_TWEAKS') %} d-none d-md-inline{% endif %}">
+                                <span aria-hidden="true" class="top-bar-list-icon language-flag country-{{ country }} language-{{ language }}"></span>
+                                {{ currentCountry.translated['name'] }}
+                            </span>
+                        </button>
+
+                        {% block layout_header_actions_countries_widget_form_items %}
+                            <ul class="top-bar-list dropdown-menu dropdown-menu-end"
+                                aria-label="{{ 'header.languageList'|trans|striptags }}">
+
+                                <li class="input-group">
+                                    <input class="form-control country-search" type="text" placeholder="{{ 'header.searchPlaceholder'|trans|striptags }}" aria-label="{{ 'header.searchPlaceholder'|trans|striptags }}"/>
+                                </li>
+
+                                {% for languageDomain in languageDomains %}
+                                    {% set isActiveSalesChannel = languageDomain.language.id is same as(context.context.languageId) %}
+
+                                    {% for salesChannelCountry in languageDomain.salesChannel.countries %}
+                                        {% set isCountryActive = isActiveSalesChannel and salesChannelCountry.id == currentCountry.id %}
+
+                                        <li class="top-bar-list-item{% if not feature('ACCESSIBILITY_TWEAKS') %} dropdown-item{% endif %}{% if isCountryActive %} item-checked active{% endif %}">
+                                            {% block layout_header_actions_countries_widget_form_items_flag %}
+                                                {% set isoCode = languageDomain.salesChannel.countries.first.iso|lower %}
+                                                {% set flagCountry = isoCode %}
+                                                {% set inputValue = languageDomain.id ~ '-' ~ salesChannelCountry.id %}
+                                                {% if feature('ACCESSIBILITY_TWEAKS') %}
+                                                    <button class="dropdown-item d-flex align-items-center gap-2{% if isCountryActive %} active{% endif %}" type="submit"  id="{{ position }}-{{ languageDomain.id }}-{{ salesChannelCountry.id }}" name="salesChannelDomainIdAndCountryId" value="{{ inputValue }}" data-country-id="{{ salesChannelCountry.id }}">
+                                                        <span aria-hidden="true" class="top-bar-list-icon language-flag country-{{ flagCountry }} language-{{ flagLanguage }}"></span>
+
+                                                        {{ salesChannelCountry.translated.name }}
+                                                    </button>
+                                                {% else %}
+                                                    {% set inputValue = languageDomain.id ~ '-' ~ salesChannelCountry.id %}
+                                                    <label class="top-bar-list-label"
+                                                           for="{{ position }}-{{ languageDomain.id }}-{{ salesChannelCountry.id }}">
+                                                        <input id="{{ position }}-{{ languageDomain.id }}-{{ salesChannelCountry.id }}"
+                                                               class="top-bar-list-radio"
+                                                               value="{{ inputValue }}"
+                                                               data-country-id="{{ salesChannelCountry.id }}"
+                                                               name="salesChannelDomainIdAndCountryId"
+                                                               type="radio"
+                                                            {% if isCountryActive%} checked{% endif %}>
+                                                        <span aria-hidden="true" class="top-bar-list-icon language-flag country-{{ flagCountry }} language-{{ flagLanguage }}"></span>
+                                                        {{ salesChannelCountry.translated.name }}
+                                                    </label>
+                                                {% endif %}
+
+                                                {% if app.request.attributes.get('_route_params')['_locale'] %}
+                                                    <input type="hidden" name="languageCode_{{ salesChannelCountry.id }}" value="{{ languageDomain.language.translationCode.code }}">
+                                                {% endif %}
+                                            {% endblock %}
+                                        </li>
+                                    {% endfor %}
+
+                                {% endfor %}
+                            </ul>
+                        {% endblock %}
+                    </div>
+                    <input name="redirectTo" type="hidden" value="{{ activeRoute }}">
+                    <input name="requestUri" type="hidden" value="{{ app.request.requestUri }}">
+                    <input name="countryId" type="hidden" value="">
+
+                    {% if fragment %}
+                        <input name="fragment" type="hidden" value="{{ fragment }}">
+                    {% endif %}
+
+                    {% for key, value in app.request.attributes.get('_route_params') %}
+                        <input name="redirectParameters[{{ key }}]" type="hidden" value="{{ value }}">
+                    {% endfor %}
+                {% endblock %}
+            </form>
+        {% endblock %}
+    </div>
+
+    {{ parent() }}
+{% endblock %}
