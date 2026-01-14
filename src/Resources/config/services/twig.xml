@@ -27,6 +27,8 @@
 
         <service id="PhallosanCustomizations\Core\Framework\Twig\LanguageSwitchExtension">
             <argument type="service" id="sales_channel_domain.repository"/>
+            <argument type="service" id="country.repository"/>
+            <argument type="service" id="PhallosanCustomizations\Service\CountrySalesChannelMappingService"/>
             <tag name="twig.extension"/>
         </service>
 

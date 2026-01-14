@@ -32,9 +32,14 @@ class LanguageChannelSwitchService
         private readonly EntityRepository $productRepository,
         private readonly ProductGatewayInterface $productGateway,
         private readonly AbstractSalesChannelContextFactory $salesChannelContextFactory,
+        private readonly CountrySalesChannelMappingService $mappingService,
     ) {
     }
 
+    /**
+     * Create redirect route for country/language switch
+     * Uses the new 3-SC mapping model
+     */
     public function createRedirectRoute(
         SalesChannelContext $salesChannelContext,
         string $salesChannelDomainId,
@@ -187,5 +192,68 @@ class LanguageChannelSwitchService
             || str_contains($requestController, 'checkout')
             || str_contains($requestController, 'account')
             || str_contains($requestController, 'dvsn'));
+    }
+
+    /**
+     * Create redirect route for country switch using new 3-SC mapping
+     * This is the new method for the consolidated Sales Channel model
+     */
+    public function createRedirectRouteForCountry(
+        SalesChannelContext $salesChannelContext,
+        string $countryIso,
+        SessionInterface $session,
+        string $requestUri = '/',
+        string $controller = '',
+        ?string $fragment = ''
+    ): string {
+        $mapping = $this->mappingService->getMappingForCountry($countryIso);
+        $targetRegion = $mapping['region'];
+        $targetLanguage = $mapping['language'];
+
+        // Get country entity by ISO
+        $country = $this->getCountryByIso($countryIso, $salesChannelContext->getContext());
+        
+        if ($country) {
+            $session->set('countryId', $country->getId());
+            $key = $salesChannelContext->getSalesChannelId() . PhallosanConstants::SESSION_SALES_CHANNEL_COUNTRY;
+            $session->set($key, $country->getTranslated()['name']);
+            $session->set(PhallosanConstants::SESSION_SALES_CHANNEL_COUNTRY_ID, $country->getId());
+        }
+
+        // Build redirect URL
+        $fragment = $fragment ? '#' . $fragment : '';
+        $redirectUrl = $this->mappingService->getRedirectUrl($countryIso, $requestUri);
+        
+        return $redirectUrl . $fragment;
+    }
+
+    /**
+     * Get country entity by ISO code
+     */
+    private function getCountryByIso(string $iso, Context $context): ?CountryEntity
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('iso', strtoupper($iso)));
+
+        /** @var CountryEntity|null $countryEntity */
+        $countryEntity = $this->countryRepository->search($criteria, $context)->first();
+
+        return $countryEntity;
+    }
+
+    /**
+     * Check if country change requires Sales Channel switch
+     */
+    public function needsSalesChannelSwitch(string $countryIso, SalesChannelContext $context): bool
+    {
+        return !$this->mappingService->isCountryInCurrentRegion($countryIso, $context);
+    }
+
+    /**
+     * Get the mapping service for external access
+     */
+    public function getMappingService(): CountrySalesChannelMappingService
+    {
+        return $this->mappingService;
     }
 }

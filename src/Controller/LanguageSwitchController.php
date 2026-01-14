@@ -2,6 +2,7 @@
 
 namespace PhallosanCustomizations\Controller;
 
+use PhallosanCustomizations\Service\CountrySalesChannelMappingService;
 use PhallosanCustomizations\Service\LanguageChannelSwitchService;
 use Shopware\Core\Checkout\Customer\SalesChannel\AbstractLogoutRoute;
 use Shopware\Core\Checkout\Customer\SalesChannel\AccountService;
@@ -10,6 +11,7 @@ use Shopware\Core\System\SalesChannel\Aggregate\SalesChannelDomain\SalesChannelD
 use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Controller\StorefrontController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,9 +24,13 @@ class LanguageSwitchController extends StorefrontController
         private readonly AbstractLogoutRoute $logoutRoute,
         private readonly AbstractSalesChannelContextFactory $salesChannelContextFactory,
         private readonly LanguageChannelSwitchService $languageChannelSwitchService,
+        private readonly CountrySalesChannelMappingService $mappingService,
     ) {
     }
 
+    /**
+     * Legacy redirect route - keeps backward compatibility
+     */
     #[Route(path: '/LanguageSwitch/redirect', name: 'frontend.language_switch.redirect', requirements: ['route' => '.+'], methods: ['POST'])]
     public function redirectCustomer(
         Request $request,
@@ -86,5 +92,73 @@ class LanguageSwitchController extends StorefrontController
         }
 
         $this->accountService->loginById($customerId, $newSalesChannelContext);
+    }
+
+    /**
+     * New route for country-based redirect using 3-SC mapping model
+     * Called when user selects a country from the dropdown
+     */
+    #[Route(path: '/LanguageSwitch/country', name: 'frontend.language_switch.country', methods: ['POST'])]
+    public function redirectByCountry(
+        Request $request,
+        SalesChannelContext $salesChannelContext
+    ): Response {
+        $response = new Response();
+        $response->headers->set('X-Robots-Tag', 'noindex, follow');
+
+        $countryIso = $request->get('countryIso');
+        
+        if (!$countryIso || !$this->mappingService->hasMapping($countryIso)) {
+            // Fallback to current page
+            return $this->redirect($request->headers->get('referer', '/'));
+        }
+
+        $redirectUrl = $this->languageChannelSwitchService->createRedirectRouteForCountry(
+            $salesChannelContext,
+            $countryIso,
+            $request->getSession(),
+            $request->get('requestUri', '/'),
+            $request->attributes->get('_route', ''),
+            $request->get('fragment')
+        );
+
+        // If user is logged in and changing Sales Channel, transfer login
+        if ($salesChannelContext->getCustomerId() && 
+            $this->languageChannelSwitchService->needsSalesChannelSwitch($countryIso, $salesChannelContext)) {
+            // Note: Customer login transfer will happen when redirecting to the new domain
+            // The new Sales Channel will handle re-login via shared customer pool
+        }
+
+        $response = $this->redirect($redirectUrl);
+        $response->headers->set('X-Robots-Tag', 'noindex, follow');
+
+        return $response;
+    }
+
+    /**
+     * AJAX endpoint for getting redirect URL without performing redirect
+     * Useful for JavaScript-based redirects
+     */
+    #[Route(path: '/LanguageSwitch/getRedirectUrl', name: 'frontend.language_switch.get_redirect_url', methods: ['POST'])]
+    public function getRedirectUrl(
+        Request $request,
+        SalesChannelContext $salesChannelContext
+    ): JsonResponse {
+        $countryIso = $request->get('countryIso');
+        $currentPath = $request->get('currentPath', '/');
+
+        if (!$countryIso) {
+            return new JsonResponse(['error' => 'Country ISO required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $redirectUrl = $this->mappingService->getRedirectUrl($countryIso, $currentPath);
+        $needsChannelSwitch = $this->languageChannelSwitchService->needsSalesChannelSwitch($countryIso, $salesChannelContext);
+
+        return new JsonResponse([
+            'redirectUrl' => $redirectUrl,
+            'needsChannelSwitch' => $needsChannelSwitch,
+            'region' => $this->mappingService->getRegionForCountry($countryIso),
+            'defaultLanguage' => $this->mappingService->getDefaultLanguageForCountry($countryIso),
+        ]);
     }
 }

@@ -17,6 +17,7 @@
             <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\LogoutRoute"/>
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
             <argument type="service" id="PhallosanCustomizations\Service\LanguageChannelSwitchService"/>
+            <argument type="service" id="PhallosanCustomizations\Service\CountrySalesChannelMappingService"/>
         </service>
 
         <service id="PhallosanCustomizations\Service\LanguageChannelSwitchService"
@@ -27,6 +28,7 @@
             <argument type="service" id="product.repository"/>
             <argument type="service" id="Shopware\Core\Content\Product\Cart\ProductGateway"/>
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
+            <argument type="service" id="PhallosanCustomizations\Service\CountrySalesChannelMappingService"/>
         </service>
     </services>
 </container>
