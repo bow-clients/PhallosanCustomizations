@@ -11,7 +11,9 @@ use Shopware\Core\System\SalesChannel\Aggregate\SalesChannelDomain\SalesChannelD
 use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Controller\StorefrontController;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -19,6 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(defaults: ['_routeScope' => ['storefront']])]
 class LanguageSwitchController extends StorefrontController
 {
+    public const COOKIE_SELECTED_COUNTRY = 'phallosan_selected_country';
     public function __construct(
         private readonly AccountService $accountService,
         private readonly AbstractLogoutRoute $logoutRoute,
@@ -129,10 +132,46 @@ class LanguageSwitchController extends StorefrontController
             // The new Sales Channel will handle re-login via shared customer pool
         }
 
-        $response = $this->redirect($redirectUrl);
+        $response = new RedirectResponse($redirectUrl, Response::HTTP_FOUND);
         $response->headers->set('X-Robots-Tag', 'noindex, follow');
+        
+        // Get the cookie domain from current host (e.g., preview.phallosan.com -> .phallosan.com)
+        $cookieDomain = $this->getCookieDomain($request->getHost());
+        
+        // Set cookie with selected country (valid for 30 days, shared across subdomains)
+        $cookie = Cookie::create(self::COOKIE_SELECTED_COUNTRY)
+            ->withValue(strtoupper($countryIso))
+            ->withExpires(time() + (30 * 86400))
+            ->withPath('/')
+            ->withDomain($cookieDomain)
+            ->withSecure($request->isSecure())
+            ->withHttpOnly(false)
+            ->withSameSite(Cookie::SAMESITE_LAX);
+        $response->headers->setCookie($cookie);
 
         return $response;
+    }
+    
+    /**
+     * Get root domain for cookie sharing across subdomains
+     * e.g., "preview.phallosan.com" -> ".phallosan.com"
+     * e.g., "eu.phallosan.com" -> ".phallosan.com"
+     */
+    private function getCookieDomain(string $host): string
+    {
+        // Remove port if present
+        $host = explode(':', $host)[0];
+        
+        // Split by dots
+        $parts = explode('.', $host);
+        
+        // If we have at least 2 parts (domain.tld), take last 2
+        if (count($parts) >= 2) {
+            return '.' . implode('.', array_slice($parts, -2));
+        }
+        
+        // Fallback to current host
+        return $host;
     }
 
     /**

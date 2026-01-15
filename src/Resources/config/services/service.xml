@@ -12,9 +12,10 @@
         </service>
 
         <!-- Country to Sales Channel Mapping Service (3-SC Model) -->
-        <!-- Reads country-SC mapping dynamically from database -->
+        <!-- Reads country-SC mapping dynamically from database and plugin config -->
         <service id="PhallosanCustomizations\Service\CountrySalesChannelMappingService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
 
     </services>

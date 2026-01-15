@@ -2,6 +2,7 @@
 
 namespace PhallosanCustomizations\Core\Framework\Twig;
 
+use PhallosanCustomizations\Controller\LanguageSwitchController;
 use PhallosanCustomizations\Service\CountrySalesChannelMappingService;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -12,6 +13,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Country\CountryEntity;
 use Shopware\Core\System\SalesChannel\Aggregate\SalesChannelDomain\SalesChannelDomainEntity;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -21,7 +23,8 @@ class LanguageSwitchExtension extends AbstractExtension
     public function __construct(
         private readonly EntityRepository $domainRepository,
         private readonly EntityRepository $countryRepository,
-        private readonly CountrySalesChannelMappingService $mappingService
+        private readonly CountrySalesChannelMappingService $mappingService,
+        private readonly RequestStack $requestStack
     ) {
     }
 
@@ -136,18 +139,19 @@ class LanguageSwitchExtension extends AbstractExtension
 
     /**
      * Get available languages for the current Sales Channel
-     * Deduplicates by language ID to avoid showing same language multiple times
+     * Deduplicates by language short code to avoid showing same language multiple times
      */
     public function getLanguagesForCurrentChannel(SalesChannelContext $salesChannelContext): array
     {
         $criteria = new Criteria();
-        $criteria->addAssociation('language.translationCode');
+        $criteria->addAssociation('language');
+        $criteria->addAssociation('language.locale');
         $criteria->addFilter(new EqualsFilter('salesChannelId', $salesChannelContext->getSalesChannelId()));
 
         $domains = $this->domainRepository->search($criteria, $salesChannelContext->getContext())->getElements();
 
         $languages = [];
-        $seenLanguageIds = [];
+        $seenShortCodes = [];
         $currentLanguageId = $salesChannelContext->getLanguageId();
 
         /** @var SalesChannelDomainEntity $domain */
@@ -157,22 +161,33 @@ class LanguageSwitchExtension extends AbstractExtension
                 continue;
             }
 
-            // Skip duplicate languages (same language with different domains)
-            if (isset($seenLanguageIds[$language->getId()])) {
+            // Get locale code from language.locale (not translationCode)
+            $locale = $language->getLocale();
+            $languageCode = $locale?->getCode() ?? 'en-GB';
+            $shortCode = strtolower(substr($languageCode, 0, 2));
+            
+            // Skip duplicate languages by short code (e.g. "en" appears once, not twice)
+            if (isset($seenShortCodes[$shortCode])) {
+                // But if this one is the active language, update the entry
+                if ($language->getId() === $currentLanguageId) {
+                    foreach ($languages as &$lang) {
+                        if (strtolower($lang['shortCode']) === $shortCode) {
+                            $lang['isActive'] = true;
+                            $lang['url'] = $domain->getUrl();
+                            break;
+                        }
+                    }
+                }
                 continue;
             }
-            $seenLanguageIds[$language->getId()] = true;
-
-            $translationCode = $language->getTranslationCode();
-            $languageCode = $translationCode?->getCode() ?? 'en-GB';
-            $shortCode = strtoupper(substr($languageCode, 0, 2));
+            $seenShortCodes[$shortCode] = true;
 
             $languages[] = [
                 'id' => $language->getId(),
                 'domainId' => $domain->getId(),
                 'name' => $language->getTranslated()['name'] ?? $language->getName(),
                 'code' => $languageCode,
-                'shortCode' => $shortCode,
+                'shortCode' => strtoupper($shortCode),
                 'url' => $domain->getUrl(),
                 'isActive' => $language->getId() === $currentLanguageId,
             ];
@@ -185,12 +200,46 @@ class LanguageSwitchExtension extends AbstractExtension
     }
 
     /**
-     * Get current country info from Sales Channel context
+     * Get current country info - first checks cookie, then falls back to shipping location
      */
     public function getCurrentCountryInfo(SalesChannelContext $salesChannelContext): array
     {
+        // First check if user has selected a country via cookie
+        $request = $this->requestStack->getCurrentRequest();
+        $selectedCountryIso = $request?->cookies->get(LanguageSwitchController::COOKIE_SELECTED_COUNTRY);
+        
+        if ($selectedCountryIso && strlen($selectedCountryIso) === 2) {
+            // User has selected a country - use that
+            $selectedCountryIso = strtoupper($selectedCountryIso);
+            
+            // Try to get country name from database
+            $criteria = new Criteria();
+            $criteria->addFilter(new EqualsFilter('iso', $selectedCountryIso));
+            $criteria->setLimit(1);
+            
+            $country = $this->countryRepository->search($criteria, $salesChannelContext->getContext())->first();
+            
+            if ($country instanceof CountryEntity) {
+                return [
+                    'id' => $country->getId(),
+                    'iso' => $selectedCountryIso,
+                    'name' => $country->getTranslated()['name'] ?? $country->getName(),
+                    'region' => $this->mappingService->getRegionForCountry($selectedCountryIso),
+                ];
+            }
+            
+            // Country not found in DB - still use the ISO from cookie
+            return [
+                'id' => '',
+                'iso' => $selectedCountryIso,
+                'name' => $selectedCountryIso,
+                'region' => $this->mappingService->getRegionForCountry($selectedCountryIso),
+            ];
+        }
+        
+        // Fallback: use shipping location from context
         $country = $salesChannelContext->getShippingLocation()->getCountry();
-        $iso = $country->getIso() ?? 'DE';
+        $iso = $country->getIso() ?? 'US';
         $region = $this->mappingService->getRegionForCountry($iso);
 
         return [

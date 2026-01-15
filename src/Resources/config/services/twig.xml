@@ -29,6 +29,7 @@
             <argument type="service" id="sales_channel_domain.repository"/>
             <argument type="service" id="country.repository"/>
             <argument type="service" id="PhallosanCustomizations\Service\CountrySalesChannelMappingService"/>
+            <argument type="service" id="request_stack"/>
             <tag name="twig.extension"/>
         </service>
 

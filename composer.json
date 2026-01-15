@@ -2,11 +2,10 @@
     "name": "phallosan/customizations",
     "description": "Phallosan Customizations Plugin",
     "type": "shopware-platform-plugin",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "license": "MIT",
     "require": {
         "shopware/core": "6.6.*",
-        "netinventors/next-language-detector": "6.5.0",
         "shopware/commercial": "*"
     },
     "extra": {

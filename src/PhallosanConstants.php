@@ -32,6 +32,11 @@ final class PhallosanConstants
      */
 
     /**
+     * Country: Default language for GeoIP redirect (stores language UUID)
+     */
+    final public const CUSTOM_FIELD_COUNTRY_GEOIP_DEFAULT_LANGUAGE = 'country_geoip_default_language';
+
+    /**
      * @deprecated
      */
     final public const CUSTOM_FIELD_HS_CODE = 'product_hs_code';

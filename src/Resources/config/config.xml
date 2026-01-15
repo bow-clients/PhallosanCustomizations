@@ -4,6 +4,38 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
 
     <card>
+        <title>Sales Channel Mapping</title>
+        <title lang="de-DE">Sales Channel Zuordnung</title>
+
+        <component name="sw-entity-single-select">
+            <name>salesChannelEu</name>
+            <entity>sales_channel</entity>
+            <label>EU Sales Channel</label>
+            <label lang="de-DE">EU Sales Channel</label>
+            <helpText>Sales Channel for European countries</helpText>
+            <helpText lang="de-DE">Sales Channel für europäische Länder</helpText>
+        </component>
+
+        <component name="sw-entity-single-select">
+            <name>salesChannelAsia</name>
+            <entity>sales_channel</entity>
+            <label>Asia Sales Channel</label>
+            <label lang="de-DE">Asien Sales Channel</label>
+            <helpText>Sales Channel for Asian countries</helpText>
+            <helpText lang="de-DE">Sales Channel für asiatische Länder</helpText>
+        </component>
+
+        <component name="sw-entity-single-select">
+            <name>salesChannelWorld</name>
+            <entity>sales_channel</entity>
+            <label>World Sales Channel</label>
+            <label lang="de-DE">Welt Sales Channel</label>
+            <helpText>Sales Channel for all other countries (Americas, Africa, etc.)</helpText>
+            <helpText lang="de-DE">Sales Channel für alle anderen Länder (Amerika, Afrika, etc.)</helpText>
+        </component>
+    </card>
+
+    <card>
         <title>Companies</title>
         <title lang="de-DE">Unternehmen</title>
 
