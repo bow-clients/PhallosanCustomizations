@@ -2,6 +2,7 @@
 
 namespace PhallosanCustomizations\Controller;
 
+use PhallosanCustomizations\PhallosanConstants;
 use PhallosanCustomizations\Service\CountrySalesChannelMappingService;
 use PhallosanCustomizations\Service\LanguageChannelSwitchService;
 use Shopware\Core\Checkout\Customer\SalesChannel\AbstractLogoutRoute;
@@ -42,8 +43,24 @@ class LanguageSwitchController extends StorefrontController
         $response = new Response();
         $response->headers->set('X-Robots-Tag', 'noindex, follow');
 
-        $salesChannelDomainIdAndCountryId = $request->get('salesChannelDomainIdAndCountryId');
-        [$salesChannelDomainId, $countryId] = explode('-', $salesChannelDomainIdAndCountryId);
+        // Check if this is a language-only switch (from the language dropdown)
+        $languageDomainId = $request->get('languageDomainId');
+
+        if ($languageDomainId) {
+            // Language switch: use the domain ID directly, keep current country
+            $salesChannelDomainId = $languageDomainId;
+            $countryId = $request->getSession()->get(PhallosanConstants::SESSION_SALES_CHANNEL_COUNTRY_ID, '');
+
+            if (empty($countryId)) {
+                // Fallback: get country from current sales channel
+                $currentCountry = $salesChannelContext->getSalesChannel()->getCountry();
+                $countryId = $currentCountry ? $currentCountry->getId() : '';
+            }
+        } else {
+            // Country switch: get domain ID and country ID from combined value
+            $salesChannelDomainIdAndCountryId = $request->get('salesChannelDomainIdAndCountryId');
+            [$salesChannelDomainId, $countryId] = explode('-', (string) $salesChannelDomainIdAndCountryId);
+        }
 
         $route = $this->languageChannelSwitchService->createRedirectRoute(
             $salesChannelContext,
