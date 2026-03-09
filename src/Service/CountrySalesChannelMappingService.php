@@ -146,6 +146,12 @@ class CountrySalesChannelMappingService
     private ?array $countryToLanguageCache = null;
 
     /**
+     * Cached country->currency mapping from currency_country_rounding
+     * @var array<string, string>|null  [ISO => Currency ID]
+     */
+    private ?array $countryCurrencyCache = null;
+
+    /**
      * Cached language short codes (e.g. 'en', 'de')
      * @var array<string, string>|null [Language ID => Short Code]
      */
@@ -529,6 +535,48 @@ class CountrySalesChannelMappingService
     }
 
     /**
+     * Get the currency ID for a country from currency_country_rounding table.
+     * Returns null if no mapping exists.
+     */
+    public function getCurrencyIdForCountry(string $countryIso): ?string
+    {
+        $this->loadCountryCurrencyMapping();
+
+        return $this->countryCurrencyCache[strtoupper($countryIso)] ?? null;
+    }
+
+    /**
+     * Load country->currency mapping from currency_country_rounding table
+     */
+    private function loadCountryCurrencyMapping(): void
+    {
+        if ($this->countryCurrencyCache !== null) {
+            return;
+        }
+
+        $this->countryCurrencyCache = [];
+
+        $sql = '
+            SELECT 
+                c.iso,
+                LOWER(HEX(ccr.currency_id)) as currency_id
+            FROM currency_country_rounding ccr
+            JOIN country c ON ccr.country_id = c.id
+            WHERE c.active = 1
+        ';
+
+        $result = $this->connection->fetchAllAssociative($sql);
+
+        foreach ($result as $row) {
+            $iso = strtoupper($row['iso']);
+            // First entry wins (if multiple currencies are mapped to a country)
+            if (!isset($this->countryCurrencyCache[$iso])) {
+                $this->countryCurrencyCache[$iso] = $row['currency_id'];
+            }
+        }
+    }
+
+    /**
      * Clear the cached country mapping (call after country assignments change)
      */
     public function clearCache(): void
@@ -537,6 +585,7 @@ class CountrySalesChannelMappingService
         $this->countryToLanguageCache = null;
         $this->languageShortCodeCache = null;
         $this->domainCache = null;
+        $this->countryCurrencyCache = null;
     }
 
     /**

@@ -10,6 +10,7 @@ use Shopware\Core\Checkout\Customer\SalesChannel\AccountService;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\Aggregate\SalesChannelDomain\SalesChannelDomainEntity;
 use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
+use Shopware\Core\System\SalesChannel\SalesChannel\AbstractContextSwitchRoute;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Controller\StorefrontController;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -29,6 +30,7 @@ class LanguageSwitchController extends StorefrontController
         private readonly AbstractSalesChannelContextFactory $salesChannelContextFactory,
         private readonly LanguageChannelSwitchService $languageChannelSwitchService,
         private readonly CountrySalesChannelMappingService $mappingService,
+        private readonly AbstractContextSwitchRoute $contextSwitchRoute,
     ) {
     }
 
@@ -147,6 +149,19 @@ class LanguageSwitchController extends StorefrontController
             $this->languageChannelSwitchService->needsSalesChannelSwitch($countryIso, $salesChannelContext)) {
             // Note: Customer login transfer will happen when redirecting to the new domain
             // The new Sales Channel will handle re-login via shared customer pool
+        }
+
+        // Auto-switch currency based on country mapping (from currency_country_rounding table)
+        $currencyId = $this->mappingService->getCurrencyIdForCountry($countryIso);
+        if ($currencyId) {
+            try {
+                $this->contextSwitchRoute->switchContext(
+                    new RequestDataBag(['currencyId' => $currencyId]),
+                    $salesChannelContext
+                );
+            } catch (\Exception $e) {
+                // Currency switch failed (e.g. currency not available in SC), continue with redirect
+            }
         }
 
         $response = new RedirectResponse($redirectUrl, Response::HTTP_FOUND);

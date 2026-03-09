@@ -2,7 +2,7 @@
     "name": "phallosan/customizations",
     "description": "Phallosan Customizations Plugin",
     "type": "shopware-platform-plugin",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "license": "MIT",
     "require": {
         "shopware/core": "6.6.*",

@@ -18,6 +18,7 @@
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
             <argument type="service" id="PhallosanCustomizations\Service\LanguageChannelSwitchService"/>
             <argument type="service" id="PhallosanCustomizations\Service\CountrySalesChannelMappingService"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\SalesChannel\ContextSwitchRoute"/>
         </service>
 
         <service id="PhallosanCustomizations\Service\LanguageChannelSwitchService"
