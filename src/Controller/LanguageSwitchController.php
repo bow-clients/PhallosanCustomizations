@@ -151,8 +151,10 @@ class LanguageSwitchController extends StorefrontController
             // The new Sales Channel will handle re-login via shared customer pool
         }
 
-        // Auto-switch currency based on country mapping (from currency_country_rounding table)
-        $currencyId = $this->mappingService->getCurrencyIdForCountry($countryIso);
+        // Auto-switch currency based on static country->currency mapping
+        // Pass target SC ID so the service can check availability and fall back to region default
+        $targetScId = $this->mappingService->getSalesChannelIdForCountry($countryIso) ?? $salesChannelContext->getSalesChannelId();
+        $currencyId = $this->mappingService->getCurrencyIdForCountry($countryIso, $targetScId);
         if ($currencyId) {
             try {
                 $this->contextSwitchRoute->switchContext(
@@ -160,7 +162,7 @@ class LanguageSwitchController extends StorefrontController
                     $salesChannelContext
                 );
             } catch (\Exception $e) {
-                // Currency switch failed (e.g. currency not available in SC), continue with redirect
+                // Currency switch failed, continue with redirect (domain default currency will apply)
             }
         }
 

@@ -1,12 +1,21 @@
 # Changelog – PhallosanCustomizations
 
+## v0.0.6 – 2026-03-10
+
+### Features
+
+- **Static country→currency mapping (`DEFAULT_CURRENCY_BY_COUNTRY`)**
+  - Replaced DB-based `currency_country_rounding` lookup with a static mapping in `CountrySalesChannelMappingService`.
+  - Currencies: EUR (51 EU countries), CHF (CH, LI), AUD (AU), JPY (JP), GBP (GB, IO, VG, GG, IM, JE). All other countries default to USD.
+  - Added region-based fallback: if the mapped currency is not available in the target Sales Channel, falls back to EUR (EU), USD (Asia/World).
+  - `getCurrencyIdForCountry()` now resolves the currency ISO to a currency ID via `sales_channel_currency` table and validates availability.
+  - Added `getCurrencyIsoForCountry()` helper method.
+
 ## v0.0.5 – 2026-03-09
 
 ### Features
 
 - **Auto-switch currency on country change**
-  - When a user selects a country in the language widget dropdown, the currency is now automatically switched based on the `currency_country_rounding` table.
-  - Added `getCurrencyIdForCountry()` method to `CountrySalesChannelMappingService` that reads country→currency mappings from the database.
   - `LanguageSwitchController::redirectByCountry()` now calls `ContextSwitchRoute::switchContext()` to persist the correct currency before redirecting.
   - Added `AbstractContextSwitchRoute` as a new dependency to `LanguageSwitchController`.
 

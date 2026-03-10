@@ -129,6 +129,47 @@ class CountrySalesChannelMappingService
     ];
 
     /**
+     * Default currency ISO code per country.
+     * Countries not listed here default to 'USD'.
+     */
+    private const DEFAULT_CURRENCY_BY_COUNTRY = [
+        // EUR – European countries
+        'AL' => 'EUR', 'AD' => 'EUR', 'AT' => 'EUR', 'BE' => 'EUR', 'BA' => 'EUR',
+        'BG' => 'EUR', 'HR' => 'EUR', 'CY' => 'EUR', 'CZ' => 'EUR', 'DK' => 'EUR',
+        'EE' => 'EUR', 'FI' => 'EUR', 'FR' => 'EUR', 'GF' => 'EUR', 'PF' => 'EUR',
+        'TF' => 'EUR', 'GE' => 'EUR', 'DE' => 'EUR', 'GI' => 'EUR', 'GR' => 'EUR',
+        'GL' => 'EUR', 'HU' => 'EUR', 'IS' => 'EUR', 'IE' => 'EUR', 'IT' => 'EUR',
+        'LV' => 'EUR', 'LT' => 'EUR', 'LU' => 'EUR', 'MO' => 'EUR', 'MK' => 'EUR',
+        'MT' => 'EUR', 'MH' => 'EUR', 'MD' => 'EUR', 'MC' => 'EUR', 'NL' => 'EUR',
+        'NO' => 'EUR', 'PL' => 'EUR', 'PT' => 'EUR', 'RO' => 'EUR', 'SM' => 'EUR',
+        'SK' => 'EUR', 'SI' => 'EUR', 'ES' => 'EUR', 'SH' => 'EUR', 'PM' => 'EUR',
+        'SE' => 'EUR', 'VA' => 'EUR', 'AX' => 'EUR', 'RS' => 'EUR', 'ME' => 'EUR',
+        'XK' => 'EUR',
+
+        // CHF – Swiss Franc
+        'LI' => 'CHF', 'CH' => 'CHF',
+
+        // AUD – Australian Dollar
+        'AU' => 'AUD',
+
+        // JPY – Japanese Yen
+        'JP' => 'JPY',
+
+        // GBP – British Pound
+        'IO' => 'GBP', 'GB' => 'GBP', 'VG' => 'GBP',
+        'GG' => 'GBP', 'IM' => 'GBP', 'JE' => 'GBP',
+    ];
+
+    /**
+     * Fallback currency ISO per region (used when the mapped currency is not available in the SC)
+     */
+    private const FALLBACK_CURRENCY_BY_REGION = [
+        self::REGION_EU => 'EUR',
+        self::REGION_ASIA => 'USD',
+        self::REGION_WORLD => 'USD',
+    ];
+
+    /**
      * Custom Field name for default language per country
      */
     public const CUSTOM_FIELD_COUNTRY_DEFAULT_LANGUAGE = 'country_geoip_default_language';
@@ -146,10 +187,16 @@ class CountrySalesChannelMappingService
     private ?array $countryToLanguageCache = null;
 
     /**
-     * Cached country->currency mapping from currency_country_rounding
-     * @var array<string, string>|null  [ISO => Currency ID]
+     * Cached currency ISO -> UUID mapping from database
+     * @var array<string, string>|null  [ISO_CODE => Currency UUID]
      */
-    private ?array $countryCurrencyCache = null;
+    private ?array $currencyIsoToIdCache = null;
+
+    /**
+     * Cached SC -> available currency IDs
+     * @var array<string, array<string>>|null  [SC_ID => [Currency UUID, ...]]
+     */
+    private ?array $scCurrencyCache = null;
 
     /**
      * Cached language short codes (e.g. 'en', 'de')
@@ -535,44 +582,100 @@ class CountrySalesChannelMappingService
     }
 
     /**
-     * Get the currency ID for a country from currency_country_rounding table.
-     * Returns null if no mapping exists.
+     * Get the currency UUID for a country, with SC availability check and region fallback.
+     * Uses static DEFAULT_CURRENCY_BY_COUNTRY mapping.
+     * If the mapped currency is not available in the target SC, falls back to the region default.
      */
-    public function getCurrencyIdForCountry(string $countryIso): ?string
+    public function getCurrencyIdForCountry(string $countryIso, ?string $salesChannelId = null): ?string
     {
-        $this->loadCountryCurrencyMapping();
+        $countryIso = strtoupper($countryIso);
+        $currencyIso = self::DEFAULT_CURRENCY_BY_COUNTRY[$countryIso] ?? 'USD';
+        $currencyId = $this->getCurrencyIdByIso($currencyIso);
 
-        return $this->countryCurrencyCache[strtoupper($countryIso)] ?? null;
+        // If we have a target SC, check if the currency is available there
+        if ($currencyId !== null && $salesChannelId !== null) {
+            if (!$this->isCurrencyAvailableInSalesChannel($currencyId, $salesChannelId)) {
+                // Fallback to region default currency
+                $region = $this->getRegionForSalesChannel($salesChannelId);
+                $fallbackIso = self::FALLBACK_CURRENCY_BY_REGION[$region] ?? 'USD';
+                $currencyId = $this->getCurrencyIdByIso($fallbackIso);
+            }
+        }
+
+        return $currencyId;
     }
 
     /**
-     * Load country->currency mapping from currency_country_rounding table
+     * Get the default currency ISO code for a country (e.g. 'EUR', 'USD')
      */
-    private function loadCountryCurrencyMapping(): void
+    public function getDefaultCurrencyIsoForCountry(string $countryIso): string
     {
-        if ($this->countryCurrencyCache !== null) {
+        return self::DEFAULT_CURRENCY_BY_COUNTRY[strtoupper($countryIso)] ?? 'USD';
+    }
+
+    /**
+     * Resolve a currency ISO code (e.g. 'EUR') to its Shopware UUID
+     */
+    private function getCurrencyIdByIso(string $isoCode): ?string
+    {
+        $this->loadCurrencyIsoToIdCache();
+
+        return $this->currencyIsoToIdCache[strtoupper($isoCode)] ?? null;
+    }
+
+    /**
+     * Check if a currency is available in a Sales Channel
+     */
+    private function isCurrencyAvailableInSalesChannel(string $currencyId, string $salesChannelId): bool
+    {
+        $this->loadScCurrencyCache();
+
+        $available = $this->scCurrencyCache[$salesChannelId] ?? [];
+
+        return in_array($currencyId, $available, true);
+    }
+
+    /**
+     * Load currency ISO -> UUID mapping from database
+     */
+    private function loadCurrencyIsoToIdCache(): void
+    {
+        if ($this->currencyIsoToIdCache !== null) {
             return;
         }
 
-        $this->countryCurrencyCache = [];
+        $this->currencyIsoToIdCache = [];
+
+        $sql = 'SELECT LOWER(HEX(id)) as currency_id, iso_code FROM currency';
+        $result = $this->connection->fetchAllAssociative($sql);
+
+        foreach ($result as $row) {
+            $this->currencyIsoToIdCache[strtoupper($row['iso_code'])] = $row['currency_id'];
+        }
+    }
+
+    /**
+     * Load Sales Channel -> available currency IDs mapping
+     */
+    private function loadScCurrencyCache(): void
+    {
+        if ($this->scCurrencyCache !== null) {
+            return;
+        }
+
+        $this->scCurrencyCache = [];
 
         $sql = '
             SELECT 
-                c.iso,
-                LOWER(HEX(ccr.currency_id)) as currency_id
-            FROM currency_country_rounding ccr
-            JOIN country c ON ccr.country_id = c.id
-            WHERE c.active = 1
+                LOWER(HEX(sales_channel_id)) as sc_id,
+                LOWER(HEX(currency_id)) as currency_id
+            FROM sales_channel_currency
         ';
 
         $result = $this->connection->fetchAllAssociative($sql);
 
         foreach ($result as $row) {
-            $iso = strtoupper($row['iso']);
-            // First entry wins (if multiple currencies are mapped to a country)
-            if (!isset($this->countryCurrencyCache[$iso])) {
-                $this->countryCurrencyCache[$iso] = $row['currency_id'];
-            }
+            $this->scCurrencyCache[$row['sc_id']][] = $row['currency_id'];
         }
     }
 
@@ -585,7 +688,8 @@ class CountrySalesChannelMappingService
         $this->countryToLanguageCache = null;
         $this->languageShortCodeCache = null;
         $this->domainCache = null;
-        $this->countryCurrencyCache = null;
+        $this->currencyIsoToIdCache = null;
+        $this->scCurrencyCache = null;
     }
 
     /**
