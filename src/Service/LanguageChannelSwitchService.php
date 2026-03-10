@@ -246,7 +246,7 @@ class LanguageChannelSwitchService
      */
     public function needsSalesChannelSwitch(string $countryIso, SalesChannelContext $context): bool
     {
-        return !$this->mappingService->isCountryInCurrentRegion($countryIso, $context);
+        return !$this->mappingService->isCountryInCurrentSalesChannel($countryIso, $context);
     }
 
     /**
