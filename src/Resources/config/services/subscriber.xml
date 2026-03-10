@@ -35,6 +35,11 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
+        <service id="PhallosanCustomizations\Subscriber\CurrencySwitchSubscriber">
+            <argument type="service" id="Shopware\Core\System\SalesChannel\SalesChannel\ContextSwitchRoute"/>
+            <tag name="kernel.event_subscriber" />
+        </service>
+
         <service id="PhallosanCustomizations\Subscriber\Registration\DisableRegistrationCaptchaSubscriber">
             <tag name="kernel.event_subscriber" />
         </service>

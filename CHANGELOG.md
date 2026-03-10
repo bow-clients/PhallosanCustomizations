@@ -1,5 +1,15 @@
 # Changelog – PhallosanCustomizations
 
+## v0.0.7 – 2026-03-10
+
+### Bugfixes
+
+- **Currency switch now works across Sales Channel redirects**
+  - Previously currency only switched correctly within the same Sales Channel. Cross-SC redirects (e.g. AT→AU) lost the currency.
+  - `LanguageSwitchController`: Now sets a short-lived `phallosan_target_currency` cookie (2 min, cross-domain) when redirecting to a different Sales Channel.
+  - New `CurrencySwitchSubscriber`: Listens on `StorefrontRenderEvent` (high priority), reads the cookie on the target domain, switches currency via `ContextSwitchRoute`, and clears the cookie in `KernelEvents::RESPONSE`.
+  - Within same SC, currency is still switched directly via `contextSwitchRoute->switchContext()`.
+
 ## v0.0.6 – 2026-03-10
 
 ### Features

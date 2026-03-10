@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class LanguageSwitchController extends StorefrontController
 {
     public const COOKIE_SELECTED_COUNTRY = 'phallosan_selected_country';
+    public const COOKIE_TARGET_CURRENCY = 'phallosan_target_currency';
     public function __construct(
         private readonly AccountService $accountService,
         private readonly AbstractLogoutRoute $logoutRoute,
@@ -155,7 +156,10 @@ class LanguageSwitchController extends StorefrontController
         // Pass target SC ID so the service can check availability and fall back to region default
         $targetScId = $this->mappingService->getSalesChannelIdForCountry($countryIso) ?? $salesChannelContext->getSalesChannelId();
         $currencyId = $this->mappingService->getCurrencyIdForCountry($countryIso, $targetScId);
-        if ($currencyId) {
+        $needsScSwitch = $this->languageChannelSwitchService->needsSalesChannelSwitch($countryIso, $salesChannelContext);
+
+        if ($currencyId && !$needsScSwitch) {
+            // Same SC: switch currency directly in the current context
             try {
                 $this->contextSwitchRoute->switchContext(
                     new RequestDataBag(['currencyId' => $currencyId]),
@@ -171,6 +175,20 @@ class LanguageSwitchController extends StorefrontController
         
         // Get the cookie domain from current host (e.g., preview.phallosan.com -> .phallosan.com)
         $cookieDomain = $this->getCookieDomain($request->getHost());
+        
+        // For cross-SC redirects: set a cookie with the target currency ID
+        // so the target domain's subscriber can pick it up and switch currency
+        if ($currencyId && $needsScSwitch) {
+            $currencyCookie = Cookie::create(self::COOKIE_TARGET_CURRENCY)
+                ->withValue($currencyId)
+                ->withExpires(time() + 120) // Short-lived: 2 minutes
+                ->withPath('/')
+                ->withDomain($cookieDomain)
+                ->withSecure($request->isSecure())
+                ->withHttpOnly(true)
+                ->withSameSite(Cookie::SAMESITE_LAX);
+            $response->headers->setCookie($currencyCookie);
+        }
         
         // Set cookie with selected country (valid for 30 days, shared across subdomains)
         $cookie = Cookie::create(self::COOKIE_SELECTED_COUNTRY)
